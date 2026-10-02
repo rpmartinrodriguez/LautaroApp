@@ -604,6 +604,7 @@ function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack, progress, 
 function BuildExercise({ exercise, onBack, onNext, onResult }) {
   const [letters, setLetters] = useState([])
   const [result, setResult] = useState(null)
+  const [helpUsed, setHelpUsed] = useState(false)
   const pool = useMemo(() => shuffle(exercise.target.word.replace(/[ÁÉÍÓÚ]/g, match => ({Á:'A',É:'E',Í:'I',Ó:'O',Ú:'U'}[match])).split('')), [exercise.target.word])
   const cleanTarget = exercise.target.word.replace(/[ÁÉÍÓÚ]/g, match => ({Á:'A',É:'E',Í:'I',Ó:'O',Ú:'U'}[match]))
 
@@ -614,13 +615,14 @@ function BuildExercise({ exercise, onBack, onNext, onResult }) {
     if (next.length === cleanTarget.length) {
       const correct = next.join('') === cleanTarget
       setResult(correct ? 'correct' : 'retry')
-      onResult?.(correct)
+      onResult?.(correct, helpUsed ? 1 : 0)
     }
   }
 
   const retry = () => {
     setLetters([])
     setResult(null)
+    setHelpUsed(false)
   }
 
   return (
@@ -632,7 +634,7 @@ function BuildExercise({ exercise, onBack, onNext, onResult }) {
           <p className="kicker">MISIÓN DE CONSTRUCCIÓN</p>
           <h2>Armá la palabra</h2>
           <div className="word-model">{exercise.target.word}</div>
-          <PronunciationControls item={exercise.target} />
+          <PronunciationControls item={exercise.target} onSupportUse={() => setHelpUsed(true)} />
           <div className="letter-slots">
             {cleanTarget.split('').map((_,i)=><span key={i}>{letters[i] || '•'}</span>)}
           </div>
