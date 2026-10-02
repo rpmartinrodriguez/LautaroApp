@@ -18,6 +18,8 @@ import AdultGate from './components/AdultGate'
 import SentenceMission from './components/SentenceMission'
 import GeneralizationPanel from './components/GeneralizationPanel'
 import AccountPanel from './components/AccountPanel'
+import MemoryMission from './components/MemoryMission'
+import CommunicationBoard from './components/CommunicationBoard'
 import { routineTemplates } from './data/routines'
 import { listConcepts } from './services/libraryService'
 import { getSessionVocabulary, getVocabularySummary, pickAdaptiveWord } from './services/vocabularyEngine'
@@ -49,6 +51,8 @@ export default function App() {
   const [showAdultGate, setShowAdultGate] = useState(false)
   const [adultUnlocked, setAdultUnlocked] = useState(false)
   const [showSentenceMission, setShowSentenceMission] = useState(false)
+  const [showMemoryMission, setShowMemoryMission] = useState(false)
+  const [showCommunication, setShowCommunication] = useState(false)
   const [activeRoutine, setActiveRoutine] = useState(null)
   const [traceItem, setTraceItem] = useState(null)
   const [customConcepts, setCustomConcepts] = useState([])
@@ -152,6 +156,14 @@ export default function App() {
     })
     commitProgress(next)
     setFeedback(correct ? 'correct' : 'retry')
+  }
+
+  const startRecommendedMission = () => {
+    if (recommendedMission.type === 'memory') {
+      setShowMemoryMission(true)
+      return
+    }
+    startExercise(recommendedMission.type)
   }
 
   const nextExercise = () => startExercise(exercise?.type || 'visual')
@@ -276,7 +288,7 @@ export default function App() {
               </div>
               <div className="recommended-actions">
                 <button className="primary" onClick={() => setShowGuidedSession(true)}>Entrenamiento guiado</button>
-                <button className="recommended-secondary" onClick={() => startExercise(recommendedMission.type)}>Solo esta misión</button>
+                <button className="recommended-secondary" onClick={startRecommendedMission}>Solo esta misión</button>
               </div>
             </section>
           ) : (
