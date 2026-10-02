@@ -8,7 +8,7 @@ export const curriculum = [
     why: 'Antes de leer o escribir necesitamos confirmar qué comprende sin depender de su pronunciación.',
     mastery: '80% o más en 3 sesiones diferentes, con ayudas reducidas.',
     homeTask: 'Dar una consigna de un paso con dos opciones visibles: “dame el vaso”, “señalá la puerta”.',
-    next: 'comprension-2',
+    next: 'visual-1',
     difficulty: 1,
   },
   {
