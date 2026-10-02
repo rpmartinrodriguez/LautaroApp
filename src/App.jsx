@@ -580,12 +580,27 @@ function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack, progress, 
   )
 }
 
-function BuildExercise({ exercise, onBack, onNext }) {
+function BuildExercise({ exercise, onBack, onNext, onResult }) {
   const [letters, setLetters] = useState([])
-  const pool = useMemo(() => shuffle(exercise.target.word.replace('Á','A').split('')), [exercise.target.word])
-  const cleanTarget = exercise.target.word.replace('Á','A')
-  const value = letters.join('')
-  const done = value === cleanTarget
+  const [result, setResult] = useState(null)
+  const pool = useMemo(() => shuffle(exercise.target.word.replace(/[ÁÉÍÓÚ]/g, match => ({Á:'A',É:'E',Í:'I',Ó:'O',Ú:'U'}[match])).split('')), [exercise.target.word])
+  const cleanTarget = exercise.target.word.replace(/[ÁÉÍÓÚ]/g, match => ({Á:'A',É:'E',Í:'I',Ó:'O',Ú:'U'}[match]))
+
+  const addLetter = letter => {
+    if (result || letters.length >= cleanTarget.length) return
+    const next = [...letters, letter]
+    setLetters(next)
+    if (next.length === cleanTarget.length) {
+      const correct = next.join('') === cleanTarget
+      setResult(correct ? 'correct' : 'retry')
+      onResult?.(correct)
+    }
+  }
+
+  const retry = () => {
+    setLetters([])
+    setResult(null)
+  }
 
   return (
     <div className="app exercise-page">
@@ -601,20 +616,34 @@ function BuildExercise({ exercise, onBack, onNext }) {
             {cleanTarget.split('').map((_,i)=><span key={i}>{letters[i] || '•'}</span>)}
           </div>
           <div className="letter-pool">
-            {pool.map((l,i)=><button key={i} onClick={() => setLetters(prev => prev.length < cleanTarget.length ? [...prev,l] : prev)}>{l}</button>)}
+            {pool.map((l,i)=><button key={i} disabled={!!result} onClick={() => addLetter(l)}>{l}</button>)}
           </div>
-          <button className="secondary" onClick={() => setLetters([])}>Borrar</button>
-          {done && <div className="feedback correct"><div className="feedback-icon">🧩</div><div><b>¡La armaste!</b><p>{exercise.target.word}</p></div><button className="primary" onClick={onNext}>Siguiente</button></div>}
+          {!result && <button className="secondary" onClick={retry}>Borrar</button>}
+          {result && (
+            <div className={'feedback ' + result}>
+              <div className="feedback-icon">{result === 'correct' ? '🧩' : '💪'}</div>
+              <div><b>{result === 'correct' ? '¡La armaste!' : 'Probamos de nuevo'}</b><p>{exercise.target.word}</p></div>
+              <button className="primary" onClick={result === 'correct' ? onNext : retry}>{result === 'correct' ? 'Siguiente' : 'Reintentar'}</button>
+            </div>
+          )}
         </section>
       </main>
     </div>
   )
 }
 
-function QuantityExercise({ onBack, onNext }) {
-  const [round] = useState(() => 1 + Math.floor(Math.random()*5))
+function QuantityExercise({ progress, onBack, onNext, onResult }) {
+  const max = getQuantityMax(progress)
+  const [round] = useState(() => 1 + Math.floor(Math.random()*max))
   const [selected,setSelected] = useState(null)
   const correct = selected === round
+
+  const choose = value => {
+    if (selected !== null) return
+    setSelected(value)
+    onResult?.(value === round, round)
+  }
+
   return (
     <div className="app exercise-page">
       <header className="exercise-top"><button className="ghost light" onClick={onBack}>← Salir</button></header>
@@ -623,7 +652,7 @@ function QuantityExercise({ onBack, onNext }) {
           <p className="kicker">MISIÓN DE CANTIDAD</p>
           <h2>¿Cuántos escudos hay?</h2>
           <div className="count-items">{Array.from({length:round}).map((_,i)=><span key={i}>🛡️</span>)}</div>
-          <div className="number-grid">{[1,2,3,4,5].map(n=><button key={n} disabled={selected!==null} onClick={()=>setSelected(n)}>{n}</button>)}</div>
+          <div className="number-grid">{quantityOptions(round,max).map(n=><button key={n} disabled={selected!==null} onClick={()=>choose(n)}>{n}</button>)}</div>
           {selected!==null && <div className={'feedback ' + (correct?'correct':'retry')}><div className="feedback-icon">{correct?'⚡':'💪'}</div><div><b>{correct?'¡Exacto!':'Probamos otra vez'}</b><p>Hay {round}.</p></div><button className="primary" onClick={onNext}>Siguiente</button></div>}
         </section>
       </main>
