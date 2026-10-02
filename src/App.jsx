@@ -4,6 +4,7 @@ import { accuracy, defaultProgress, loadProgress, masteryStatus, recordAttempt, 
 import { loadCloudProgress, mergeProgress, saveCloudProgress } from './services/cloudProgress'
 import AssessmentFlow from './components/AssessmentFlow'
 import PlanPanel from './components/PlanPanel'
+import { getRecommendedMission, getUnlockedSkillIndex } from './services/adaptiveEngine'
 
 const heroBadges = [
   { min: 0, label: 'Aprendiz', icon: '🛡️' },
@@ -29,6 +30,8 @@ export default function App() {
   const [showAssessment, setShowAssessment] = useState(false)
   const [syncStatus, setSyncStatus] = useState('connecting')
   const badge = getBadge(progress.xp)
+  const recommendedMission = getRecommendedMission(progress)
+  const unlockedSkillIndex = getUnlockedSkillIndex(progress)
 
   useEffect(() => {
     let mounted = true
@@ -144,10 +147,30 @@ export default function App() {
         <main>
           <div className="section-head">
             <p className="kicker">HOLA, LAUTARO</p>
-            <h2>Elegí tu misión</h2>
-            <p className="muted">Hoy alcanza con completar unas pocas. Cuando terminamos, terminamos.</p>
+            <h2>{progress.assessment?.status === 'completed' ? 'Tu entrenamiento de hoy' : 'Probemos algunas misiones'}</h2>
+            <p className="muted">{progress.assessment?.status === 'completed' ? 'La primera misión está elegida según tu plan actual.' : 'Un adulto puede completar primero la evaluación para personalizar el recorrido.'}</p>
           </div>
 
+          {progress.assessment?.status === 'completed' ? (
+            <section className="recommended-mission">
+              <div className="recommended-icon">{recommendedMission.icon}</div>
+              <div>
+                <p className="kicker">MISIÓN RECOMENDADA</p>
+                <h3>{recommendedMission.title}</h3>
+                <p>{recommendedMission.subtitle}</p>
+                <small>Estamos trabajando: {recommendedMission.curriculum.title}</small>
+              </div>
+              <button className="primary" onClick={() => startExercise(recommendedMission.type)}>Empezar</button>
+            </section>
+          ) : (
+            <section className="assessment-reminder">
+              <span>🧭</span>
+              <div><b>Plan personalizado pendiente</b><p>Las misiones de abajo sirven para explorar. Después de la evaluación, la app va a ordenar automáticamente qué conviene trabajar primero.</p></div>
+              <button className="secondary" onClick={() => { setMode('adult'); setAdultTab('plan') }}>Preparar plan</button>
+            </section>
+          )}
+
+          <p className="kicker mission-library-title">OTRAS MISIONES PARA PRACTICAR</p>
           <div className="mission-grid">
             <button className="mission-card mission-blue" onClick={() => startExercise('visual')}>
               <span className="mission-icon">👀</span>
@@ -177,7 +200,7 @@ export default function App() {
               <h3>Los poderes se entrenan de a poco</h3>
             </div>
             <div className="path-line">
-              {['👀','🔤','👂','🧩','✍️','📖','🧭'].map((x,i) => <span className={i < Math.min(7, Math.floor(progress.xp/40)+1) ? 'done':''} key={i}>{x}</span>)}
+              {['🧠','👀','🔤','👂','🧩','✍️','📖','🔢','🧭'].map((x,i) => <span className={i <= unlockedSkillIndex ? 'done':''} key={i}>{x}</span>)}
             </div>
           </section>
         </main>
