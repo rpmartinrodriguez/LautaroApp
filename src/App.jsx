@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { curriculum, starterWords } from './data/curriculum'
 import { accuracy, defaultProgress, loadProgress, masteryStatus, recordAttempt, saveProgress } from './services/progressEngine'
 import { loadCloudProgress, mergeProgress, saveCloudProgress } from './services/cloudProgress'
+import AssessmentFlow from './components/AssessmentFlow'
+import PlanPanel from './components/PlanPanel'
 
 const heroBadges = [
   { min: 0, label: 'Aprendiz', icon: '🛡️' },
@@ -23,7 +25,8 @@ export default function App() {
   const [progress, setProgress] = useState(loadProgress)
   const [exercise, setExercise] = useState(null)
   const [feedback, setFeedback] = useState(null)
-  const [adultTab, setAdultTab] = useState('ruta')
+  const [adultTab, setAdultTab] = useState('plan')
+  const [showAssessment, setShowAssessment] = useState(false)
   const [syncStatus, setSyncStatus] = useState('connecting')
   const badge = getBadge(progress.xp)
 
@@ -53,6 +56,11 @@ export default function App() {
     connectCloud()
     return () => { mounted = false }
   }, [])
+
+  const commitProgress = (next) => {
+    saveProgress(next)
+    commitProgress(next)
+  }
 
   const startExercise = (type = 'visual') => {
     const target = starterWords[Math.floor(Math.random() * starterWords.length)]
@@ -84,13 +92,8 @@ export default function App() {
 
   const resetData = () => {
     if (!confirm('¿Seguro que querés borrar el progreso guardado en este dispositivo?')) return
-    const clean = { ...defaultProgress, sessions: [], wordStats: {}, skillStats: {} }
-    saveProgress(clean)
-    setProgress(clean)
-    setSyncStatus('syncing')
-    saveCloudProgress(clean)
-      .then(result => setSyncStatus(result.enabled ? 'synced' : (result.reason === 'not-configured' ? 'not-configured' : 'offline')))
-      .catch(() => setSyncStatus('offline'))
+    const clean = { ...defaultProgress, sessions: [], wordStats: {}, skillStats: {}, assessment: { ...defaultProgress.assessment, answers: {} } }
+    commitProgress(clean)
   }
 
   if (mode === 'home') {
@@ -112,6 +115,7 @@ export default function App() {
               <h2>Entrenamos un poder nuevo</h2>
               <p className="muted">Actividades cortas, claras y adaptadas. Una misión a la vez.</p>
               <button className="primary" onClick={() => setMode('child')}>Entrar a mis misiones</button>
+              {progress.assessment?.status !== 'completed' && <button className="hero-link" onClick={() => { setMode('adult'); setAdultTab('plan') }}>Primero: preparar mi plan →</button>}
             </div>
           </section>
 
@@ -197,7 +201,8 @@ export default function App() {
 
       <nav className="tabs">
         {[
-          ['ruta','Ruta'],
+          ['plan','Mi plan'],
+          ['ruta','Ruta completa'],
           ['progreso','Progreso'],
           ['sesion','Sesión de hoy'],
           ['biblioteca','Biblioteca'],
@@ -207,11 +212,20 @@ export default function App() {
       </nav>
 
       <main className="adult-main">
+        {adultTab === 'plan' && <PlanPanel progress={progress} onStartAssessment={() => setShowAssessment(true)} />}
         {adultTab === 'ruta' && <RoutePanel progress={progress} />}
         {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} />}
         {adultTab === 'sesion' && <SessionPanel onStart={() => startExercise('visual')} />}
         {adultTab === 'biblioteca' && <LibraryPanel />}
       </main>
+      {showAssessment && (
+        <AssessmentFlow
+          progress={progress}
+          onChange={commitProgress}
+          onClose={() => setShowAssessment(false)}
+          onComplete={(next) => { commitProgress(next); setShowAssessment(false); setAdultTab('plan') }}
+        />
+      )}
     </div>
   )
 }
