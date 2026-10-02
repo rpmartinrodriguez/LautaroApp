@@ -2,17 +2,31 @@
   command = "npm run build"
   publish = "dist"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Esta app no usa rutas del navegador (React Router), por lo que no
+# necesitamos reescribir todos los 404 a index.html. Esto evita que un
+# asset JS viejo reciba HTML y provoque errores de MIME type.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
 
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]
-    Cache-Control = "public, max-age=3600"
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
