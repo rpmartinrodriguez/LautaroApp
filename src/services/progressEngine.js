@@ -48,23 +48,40 @@ export function saveProgress(progress) {
 
 export function recordAttempt(progress, { skillId, itemId, correct, helpLevel = 0, responseMs = null }) {
   const key = itemId || skillId
-  const old = progress.wordStats[key] || { attempts: 0, correct: 0, help: 0 }
+  const old = progress.wordStats[key] || {
+    attempts: 0,
+    correct: 0,
+    help: 0,
+    correctStreak: 0,
+    recentResults: [],
+  }
+
   const wordStats = {
     ...progress.wordStats,
     [key]: {
       attempts: old.attempts + 1,
       correct: old.correct + (correct ? 1 : 0),
-      help: old.help + helpLevel,
+      help: (old.help || 0) + helpLevel,
+      correctStreak: correct ? (old.correctStreak || 0) + 1 : 0,
+      recentResults: [...(old.recentResults || []), !!correct].slice(-5),
       lastAt: new Date().toISOString(),
     },
   }
 
-  const skillOld = progress.skillStats[skillId] || { attempts: 0, correct: 0 }
+  const skillOld = progress.skillStats[skillId] || {
+    attempts: 0,
+    correct: 0,
+    correctStreak: 0,
+    recentResults: [],
+  }
+
   const skillStats = {
     ...progress.skillStats,
     [skillId]: {
       attempts: skillOld.attempts + 1,
       correct: skillOld.correct + (correct ? 1 : 0),
+      correctStreak: correct ? (skillOld.correctStreak || 0) + 1 : 0,
+      recentResults: [...(skillOld.recentResults || []), !!correct].slice(-5),
       lastAt: new Date().toISOString(),
       responseMs,
     },
@@ -76,6 +93,7 @@ export function recordAttempt(progress, { skillId, itemId, correct, helpLevel = 
     wordStats,
     skillStats,
   }
+
   saveProgress(next)
   return next
 }
