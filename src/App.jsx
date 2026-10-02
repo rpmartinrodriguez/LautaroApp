@@ -17,6 +17,7 @@ import RoutineRunner from './components/RoutineRunner'
 import AdultGate from './components/AdultGate'
 import SentenceMission from './components/SentenceMission'
 import GeneralizationPanel from './components/GeneralizationPanel'
+import AccountPanel from './components/AccountPanel'
 import { routineTemplates } from './data/routines'
 import { listConcepts } from './services/libraryService'
 import { getSessionVocabulary, getVocabularySummary, pickAdaptiveWord } from './services/vocabularyEngine'
@@ -413,6 +414,7 @@ export default function App() {
           ['rutinas','Rutinas'],
           ['vida-real','Vida real'],
           ['biblioteca','Biblioteca'],
+          ['cuenta','Cuenta'],
         ].map(([id,label]) => (
           <button key={id} className={adultTab===id?'active':''} onClick={() => setAdultTab(id)}>{label}</button>
         ))}
@@ -427,6 +429,7 @@ export default function App() {
         {adultTab === 'rutinas' && <RoutinesPanel progress={progress} onStart={setActiveRoutine} onChange={commitProgress} />}
         {adultTab === 'vida-real' && <GeneralizationPanel progress={progress} words={allVocabulary} onChange={commitProgress} />}
         {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
+        {adultTab === 'cuenta' && <AccountPanel progress={progress} onProgressChange={commitProgress} />}
       </main>
       {activeRoutine && (
         <RoutineRunner
