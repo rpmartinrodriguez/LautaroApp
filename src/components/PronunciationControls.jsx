@@ -8,11 +8,12 @@ import {
   stopSpeech,
 } from '../services/speechService'
 
-export default function PronunciationControls({ item, compact = false }) {
+export default function PronunciationControls({ item, compact = false, onSupportUse }) {
   const [playing, setPlaying] = useState('')
   const syllables = useMemo(() => getSyllables(item), [item?.word, item?.syllables?.join?.('|')])
 
   const run = async (mode, fn) => {
+    if (mode !== 'normal') onSupportUse?.(mode)
     setPlaying(mode)
     try {
       await fn(item)
