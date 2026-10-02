@@ -290,3 +290,17 @@ details{background:#f8fafc;border-radius:12px;padding:10px 12px}summary{cursor:p
   .mobile-install{display:block}
   .mobile-install .install-button,.mobile-install .install-status{display:inline-flex}
 }
+
+.vocab-summary-card{grid-column:1/-1;background:linear-gradient(135deg,#f7fbff,#eef4ff);border:1px solid #dce7f5;border-radius:20px;padding:22px;display:grid;grid-template-columns:1fr auto;gap:16px}
+.vocab-summary-card p{margin-bottom:0;color:#657188}
+.vocab-counters{display:flex;gap:10px}
+.vocab-counters>span{min-width:105px;background:white;border:1px solid #dfe6f0;border-radius:14px;padding:12px;text-align:center;display:flex;flex-direction:column}
+.vocab-counters b{font-size:24px}
+.vocab-counters small{color:#788398}
+.active-vocab{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:7px}
+.active-vocab span{background:white;border:1px solid #dfe6f0;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;color:#334567}
+@media(max-width:800px){
+  .vocab-summary-card{grid-column:1;grid-template-columns:1fr}
+  .vocab-counters{flex-wrap:wrap}
+  .active-vocab{grid-column:1}
+}
