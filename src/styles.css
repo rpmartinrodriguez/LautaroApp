@@ -149,3 +149,18 @@ details{background:#f8fafc;border-radius:12px;padding:10px 12px}summary{cursor:p
   .rating-grid{grid-template-columns:1fr}
   .assessment-progress>div:first-child{flex-direction:column;gap:2px}
 }
+
+.recommended-mission,.assessment-reminder{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;border-radius:22px;padding:20px 22px;margin-bottom:22px}
+.recommended-mission{background:linear-gradient(135deg,#182b52,#2e4f91);color:white;box-shadow:0 18px 44px rgba(28,48,89,.16)}
+.recommended-mission .kicker{color:#a9bdea}
+.recommended-mission p{margin-bottom:4px;color:#d9e3f6}
+.recommended-mission small{color:#b9c9e8}
+.recommended-icon{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;font-size:34px;background:rgba(255,255,255,.1)}
+.assessment-reminder{background:#fff8e7;border:1px solid #eee0b7}
+.assessment-reminder>span{font-size:34px}
+.assessment-reminder p{margin:4px 0 0;color:#705f36}
+.mission-library-title{margin-top:6px}
+@media(max-width:800px){
+  .recommended-mission,.assessment-reminder{grid-template-columns:auto 1fr}
+  .recommended-mission .primary,.assessment-reminder .secondary{grid-column:1/-1}
+}
