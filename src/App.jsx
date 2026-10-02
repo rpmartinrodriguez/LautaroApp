@@ -140,6 +140,7 @@ export default function App() {
           <div className="top-actions"><InstallPWA /><SyncPill status={syncStatus} /><div className="badge-chip"><span>{badge.icon}</span><b>{badge.label}</b><small>{progress.xp} XP</small></div></div>
         </header>
 
+        <div className="mobile-install"><InstallPWA /></div>
         <main className="home-grid">
           <section className="hero-panel">
             <div className="hero-orb">🦸</div>
