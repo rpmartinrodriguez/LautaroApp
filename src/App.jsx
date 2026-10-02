@@ -59,7 +59,11 @@ export default function App() {
 
   const commitProgress = (next) => {
     saveProgress(next)
-    commitProgress(next)
+    setProgress(next)
+    setSyncStatus('syncing')
+    saveCloudProgress(next)
+      .then(result => setSyncStatus(result.enabled ? 'synced' : (result.reason === 'not-configured' ? 'not-configured' : 'offline')))
+      .catch(() => setSyncStatus('offline'))
   }
 
   const startExercise = (type = 'visual') => {
@@ -80,11 +84,7 @@ export default function App() {
       helpLevel: 0,
       responseMs: Date.now() - exercise.startedAt,
     })
-    setProgress(next)
-    setSyncStatus('syncing')
-    saveCloudProgress(next)
-      .then(result => setSyncStatus(result.enabled ? 'synced' : (result.reason === 'not-configured' ? 'not-configured' : 'offline')))
-      .catch(() => setSyncStatus('offline'))
+    commitProgress(next)
     setFeedback(correct ? 'correct' : 'retry')
   }
 
