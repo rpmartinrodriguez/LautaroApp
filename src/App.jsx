@@ -20,6 +20,7 @@ import GeneralizationPanel from './components/GeneralizationPanel'
 import AccountPanel from './components/AccountPanel'
 import MemoryMission from './components/MemoryMission'
 import CommunicationBoard from './components/CommunicationBoard'
+import ProfessionalGoals from './components/ProfessionalGoals'
 import { routineTemplates } from './data/routines'
 import { listConcepts } from './services/libraryService'
 import { getSessionVocabulary, getVocabularySummary, pickAdaptiveWord } from './services/vocabularyEngine'
@@ -474,6 +475,7 @@ export default function App() {
           ['sesion','Sesión de hoy'],
           ['rutinas','Rutinas'],
           ['vida-real','Vida real'],
+          ['objetivos','Objetivos'],
           ['biblioteca','Biblioteca'],
           ['cuenta','Cuenta'],
         ].map(([id,label]) => (
@@ -486,9 +488,10 @@ export default function App() {
         {adultTab === 'ruta' && <RoutePanel progress={progress} />}
         {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} vocabularySummary={vocabularySummary} />}
         {adultTab === 'informe' && <WeeklyReport progress={progress} vocabularySummary={vocabularySummary} />}
-        {adultTab === 'sesion' && <SessionPanel onStart={() => setShowGuidedSession(true)} />}
+        {adultTab === 'sesion' && <SessionPanel progress={progress} onStart={() => setShowGuidedSession(true)} />}
         {adultTab === 'rutinas' && <RoutinesPanel progress={progress} onStart={setActiveRoutine} onChange={commitProgress} />}
         {adultTab === 'vida-real' && <GeneralizationPanel progress={progress} words={allVocabulary} onChange={commitProgress} />}
+        {adultTab === 'objetivos' && <ProfessionalGoals progress={progress} onChange={commitProgress} />}
         {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
         {adultTab === 'cuenta' && <AccountPanel progress={progress} onProgressChange={commitProgress} onAccountReady={refreshConcepts} />}
       </main>
@@ -768,7 +771,8 @@ function ProgressPanel({ progress, onReset, syncStatus, vocabularySummary }) {
   )
 }
 
-function SessionPanel({ onStart }) {
+function SessionPanel({ progress, onStart }) {
+  const activeGoals = (progress.professionalGoals || []).filter(goal => goal.active).slice(0,3)
   return (
     <div className="session-layout">
       <section className="session-card">
@@ -786,6 +790,13 @@ function SessionPanel({ onStart }) {
         <button className="primary" onClick={onStart}>Comenzar primera misión</button>
       </section>
       <section className="session-card soft">
+        {activeGoals.length > 0 && (
+          <div className="session-goals">
+            <p className="kicker">OBJETIVOS DEL EQUIPO</p>
+            {activeGoals.map(goal => <p key={goal.id}><b>{goal.area}:</b> {goal.text}</p>)}
+            <hr />
+          </div>
+        )}
         <h3>Qué observar</h3>
         <p>✓ Si responde solo o necesita señal.</p>
         <p>✓ Si entiende aunque no pronuncie bien.</p>
