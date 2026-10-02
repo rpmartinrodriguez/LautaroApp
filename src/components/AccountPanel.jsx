@@ -18,7 +18,7 @@ function messageFor(error) {
   return error?.message || 'No pudimos completar la operación.'
 }
 
-export default function AccountPanel({ progress, onProgressChange }) {
+export default function AccountPanel({ progress, onProgressChange, onAccountReady }) {
   const [user, setUser] = useState(null)
   const [mode, setMode] = useState('link')
   const [email, setEmail] = useState('')
@@ -45,10 +45,12 @@ export default function AccountPanel({ progress, onProgressChange }) {
       if (mode === 'link') {
         await createAdultAccount(email, password)
         await saveCloudProgress(progress)
+        await onAccountReady?.()
         setMessage('Cuenta vinculada. Este progreso ya puede recuperarse en otro dispositivo.')
       } else {
         await signInAdultAccount(email, password)
         await syncAfterAuth()
+        await onAccountReady?.()
         setMessage('Cuenta conectada y progreso sincronizado.')
       }
       setPassword('')
