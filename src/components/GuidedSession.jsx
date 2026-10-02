@@ -151,10 +151,7 @@ export default function GuidedSession({
               <h2>{round.target.word}</h2>
               <p className="muted">Escuchen primero por sílabas. Después Lautaro puede repetir a su manera. No hace falta que salga perfecto.</p>
               <PronunciationControls item={round.target} />
-              <button className="primary guided-continue" onClick={() => {
-                commitAnswer(true, round.target.id, 'visual')
-                setTimeout(goNext, 120)
-              }}>Listo, seguimos</button>
+              <button className="primary guided-continue" onClick={goNext}>Listo, seguimos</button>
             </section>
           )}
 
