@@ -88,6 +88,7 @@ export default function GuidedSession({
   const [index, setIndex] = useState(0)
   const [feedback, setFeedback] = useState(null)
   const [built, setBuilt] = useState([])
+  const [helpUsed, setHelpUsed] = useState(false)
   const [startedAt, setStartedAt] = useState(Date.now())
   const round = rounds[index]
 
@@ -98,6 +99,7 @@ export default function GuidedSession({
       skillId: skillForType(type, focusMission?.skillId),
       itemId,
       correct,
+      helpLevel: helpUsed ? 1 : 0,
       responseMs: Date.now() - startedAt,
     })
     onCommit(next)
@@ -107,6 +109,7 @@ export default function GuidedSession({
   const goNext = () => {
     setFeedback(null)
     setBuilt([])
+    setHelpUsed(false)
     setStartedAt(Date.now())
     setIndex(current => Math.min(current + 1, rounds.length - 1))
   }
@@ -160,6 +163,7 @@ export default function GuidedSession({
               round={round}
               feedback={feedback}
               showPronunciation
+              onSupportUse={() => setHelpUsed(true)}
               onChoose={item => commitAnswer(item.letter === round.target.word[0].toUpperCase(), round.target.id, 'sound')}
               onNext={goNext}
             />
@@ -171,7 +175,7 @@ export default function GuidedSession({
               <p className="kicker">ESCUCHAR Y REPETIR</p>
               <h2>{round.target.word}</h2>
               <p className="muted">Escuchen primero por sílabas. Después Lautaro puede repetir a su manera. No hace falta que salga perfecto.</p>
-              <PronunciationControls item={round.target} />
+              <PronunciationControls item={round.target} onSupportUse={onSupportUse} />
               <button className="primary guided-continue" onClick={goNext}>Listo, seguimos</button>
             </section>
           )}
@@ -184,6 +188,7 @@ export default function GuidedSession({
               feedback={feedback}
               onDone={correct => commitAnswer(correct, round.target.id, 'build')}
               onNext={goNext}
+              onSupportUse={() => setHelpUsed(true)}
             />
           )}
 
@@ -201,13 +206,13 @@ export default function GuidedSession({
   )
 }
 
-function ChoiceRound({ title, round, feedback, onChoose, onNext, showPronunciation = false }) {
+function ChoiceRound({ title, round, feedback, onChoose, onNext, showPronunciation = false, onSupportUse }) {
   return (
     <section className="guided-task">
       <Visual item={round.target} />
       <p className="kicker">MISIÓN</p>
       <h2>{title}</h2>
-      {showPronunciation && <PronunciationControls item={round.target} />}
+      {showPronunciation && <PronunciationControls item={round.target} onSupportUse={onSupportUse} />}
       <div className="guided-options">
         {round.options.map(item => (
           <button key={item.id} disabled={!!feedback} onClick={() => onChoose(item)}>{item.word}</button>
@@ -218,7 +223,7 @@ function ChoiceRound({ title, round, feedback, onChoose, onNext, showPronunciati
   )
 }
 
-function BuildRound({ round, built, setBuilt, feedback, onDone, onNext }) {
+function BuildRound({ round, built, setBuilt, feedback, onDone, onNext, onSupportUse }) {
   const clean = round.target.word.replace(/Á/g, 'A').replace(/É/g, 'E').replace(/Í/g, 'I').replace(/Ó/g, 'O').replace(/Ú/g, 'U')
   const letters = useMemo(() => shuffle(clean.split('')), [clean])
   const value = built.join('')
