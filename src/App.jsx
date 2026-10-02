@@ -13,6 +13,10 @@ import GuidedSession from './components/GuidedSession'
 import TracePad from './components/TracePad'
 import RoutinesPanel from './components/RoutinesPanel'
 import WeeklyReport from './components/WeeklyReport'
+import RoutineRunner from './components/RoutineRunner'
+import AdultGate from './components/AdultGate'
+import SentenceMission from './components/SentenceMission'
+import GeneralizationPanel from './components/GeneralizationPanel'
 import { listConcepts } from './services/libraryService'
 import { getSessionVocabulary, getVocabularySummary, pickAdaptiveWord } from './services/vocabularyEngine'
 import { applySkillProgression } from './services/skillProgression'
@@ -40,6 +44,10 @@ export default function App() {
   const [adultTab, setAdultTab] = useState('plan')
   const [showAssessment, setShowAssessment] = useState(false)
   const [showGuidedSession, setShowGuidedSession] = useState(false)
+  const [showAdultGate, setShowAdultGate] = useState(false)
+  const [adultUnlocked, setAdultUnlocked] = useState(false)
+  const [showSentenceMission, setShowSentenceMission] = useState(false)
+  const [activeRoutine, setActiveRoutine] = useState(null)
   const [traceItem, setTraceItem] = useState(null)
   const [customConcepts, setCustomConcepts] = useState([])
   const [syncStatus, setSyncStatus] = useState('connecting')
@@ -145,6 +153,15 @@ export default function App() {
   }
 
   const nextExercise = () => startExercise(exercise?.type || 'visual')
+
+  const openAdult = (tab = 'plan') => {
+    setAdultTab(tab)
+    if (adultUnlocked) {
+      setMode('adult')
+      return
+    }
+    setShowAdultGate(true)
+  }
 
   const resetData = () => {
     if (!confirm('¿Seguro que querés borrar el progreso guardado en este dispositivo?')) return
