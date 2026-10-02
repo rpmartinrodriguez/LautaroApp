@@ -50,6 +50,13 @@ const skillToMission = {
     subtitle: 'Palabras que forman un mensaje',
     area: 'Lectura',
   },
+  'memoria-1': {
+    type: 'memory',
+    icon: '🎯',
+    title: 'Misión de memoria',
+    subtitle: 'Mirá, recordá y elegí',
+    area: 'Memoria y atención',
+  },
   'matematica-1': {
     type: 'quantity',
     icon: '🔢',
