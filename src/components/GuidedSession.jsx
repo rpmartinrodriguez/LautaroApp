@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import PronunciationControls from './PronunciationControls'
 import { recordAttempt } from '../services/progressEngine'
+import { getQuantityMax, quantityOptions } from '../services/mathEngine'
 
 function shuffle(items) {
   return [...items].sort(() => Math.random() - 0.5)
@@ -34,7 +35,7 @@ function makeRound(words, type, index) {
   }
 }
 
-function buildRounds(words, focusType) {
+function buildRounds(words, focusType, quantityMax) {
   if (!words.length) return []
 
   const focus = ['visual', 'sound', 'build', 'quantity'].includes(focusType) ? focusType : 'visual'
@@ -55,7 +56,8 @@ function buildRounds(words, focusType) {
       return {
         id: 'quantity-' + index,
         type: 'quantity',
-        count: 1 + Math.floor(Math.random() * 5),
+        count: 1 + Math.floor(Math.random() * quantityMax),
+        max: quantityMax,
       }
     }
     return makeRound(words, type, index)
@@ -78,9 +80,10 @@ export default function GuidedSession({
   onClose,
   onFinish,
 }) {
+  const quantityMax = getQuantityMax(progress)
   const rounds = useMemo(
-    () => buildRounds(words, focusMission?.type || 'visual'),
-    [words, focusMission?.type],
+    () => buildRounds(words, focusMission?.type || 'visual', quantityMax),
+    [words, focusMission?.type, quantityMax],
   )
   const [index, setIndex] = useState(0)
   const [feedback, setFeedback] = useState(null)
@@ -247,7 +250,7 @@ function QuantityRound({ round, feedback, onChoose, onNext }) {
       <p className="kicker">CANTIDAD</p>
       <h2>¿Cuántos escudos hay?</h2>
       <div className="guided-count">{Array.from({ length: round.count }).map((_,i) => <span key={i}>🛡️</span>)}</div>
-      <div className="guided-options numbers">{[1,2,3,4,5].map(n => <button key={n} disabled={!!feedback} onClick={() => onChoose(n)}>{n}</button>)}</div>
+      <div className="guided-options numbers">{quantityOptions(round.count, round.max || 5).map(n => <button key={n} disabled={!!feedback} onClick={() => onChoose(n)}>{n}</button>)}</div>
       <Feedback feedback={feedback} correctText={String(round.count)} onNext={onNext} />
     </section>
   )
