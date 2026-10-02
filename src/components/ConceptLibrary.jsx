@@ -14,6 +14,7 @@ export default function ConceptLibrary({ onLibraryChange }) {
     emoji: '⭐',
     category: 'Personal',
     syllables: '',
+    priority: false,
   })
   const [imageFile, setImageFile] = useState(null)
   const [filter, setFilter] = useState('Todas')
@@ -46,7 +47,7 @@ export default function ConceptLibrary({ onLibraryChange }) {
     setItems(prev => [...prev.filter(item => item.id !== result.concept.id), result.concept].sort((a,b) => a.word.localeCompare(b.word, 'es')))
     onLibraryChange?.([...items, result.concept])
     setCloud(result.cloud)
-    setForm({ word: '', emoji: '⭐', category: 'Personal', syllables: '' })
+    setForm({ word: '', emoji: '⭐', category: 'Personal', syllables: '', priority: false })
     setImageFile(null)
     setMessage(result.cloud ? 'Concepto guardado y sincronizado.' : 'Concepto guardado en este dispositivo. La foto necesita conexión para subirse.')
     setSaving(false)
@@ -96,6 +97,13 @@ export default function ConceptLibrary({ onLibraryChange }) {
             <span>Sílabas opcionales</span>
             <input value={form.syllables} onChange={e => setForm({...form, syllables:e.target.value})} placeholder="MO-CHI-LA" />
           </label>
+          <label className="priority-field">
+            <span>Prioridad</span>
+            <div className="priority-toggle">
+              <input type="checkbox" checked={form.priority} onChange={e => setForm({...form, priority:e.target.checked})} />
+              <small>Hacer que aparezca más seguido mientras la aprende.</small>
+            </div>
+          </label>
           <label className="photo-field">
             <span>Foto real (opcional)</span>
             <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} />
@@ -134,7 +142,7 @@ export default function ConceptLibrary({ onLibraryChange }) {
                 </div>
                 <div className="concept-info">
                   <b>{item.word}</b>
-                  <small>{item.category || 'Personal'}{item.syllables?.length ? ' · ' + item.syllables.join('-') : ''}</small>
+                  <small>{item.priority ? '⭐ Prioridad · ' : ''}{item.category || 'Personal'}{item.syllables?.length ? ' · ' + item.syllables.join('-') : ''}</small>
                 </div>
                 <div className="concept-actions">
                   <button onClick={() => speak(item.word)} title="Escuchar">🔊</button>
