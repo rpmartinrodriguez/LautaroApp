@@ -7,6 +7,7 @@ import PlanPanel from './components/PlanPanel'
 import { getRecommendedMission, getUnlockedSkillIndex } from './services/adaptiveEngine'
 import InstallPWA from './components/InstallPWA'
 import ConceptLibrary from './components/ConceptLibrary'
+import PronunciationControls from './components/PronunciationControls'
 import { listConcepts } from './services/libraryService'
 
 const heroBadges = [
@@ -276,16 +277,6 @@ function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack }) {
     ? '¿Cuál empieza como “' + exercise.target.word[0] + '”?'
     : '¿Dónde dice ' + exercise.target.word + '?'
 
-  const speak = () => {
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel()
-      const u = new SpeechSynthesisUtterance(exercise.target.word.toLowerCase())
-      u.lang = 'es-AR'
-      u.rate = 0.75
-      speechSynthesis.speak(u)
-    }
-  }
-
   return (
     <div className="app exercise-page">
       <header className="exercise-top">
@@ -297,7 +288,7 @@ function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack }) {
           <VisualCue item={exercise.target} />
           <p className="kicker">MISIÓN DE OBSERVACIÓN</p>
           <h2>{instruction}</h2>
-          <button className="listen" onClick={speak}>🔊 Escuchar</button>
+          <PronunciationControls item={exercise.target} />
 
           <div className="answer-grid">
             {exercise.options.map(w => (
@@ -339,6 +330,7 @@ function BuildExercise({ exercise, onBack, onNext }) {
           <p className="kicker">MISIÓN DE CONSTRUCCIÓN</p>
           <h2>Armá la palabra</h2>
           <div className="word-model">{exercise.target.word}</div>
+          <PronunciationControls item={exercise.target} />
           <div className="letter-slots">
             {cleanTarget.split('').map((_,i)=><span key={i}>{letters[i] || '•'}</span>)}
           </div>
