@@ -96,6 +96,15 @@ export default function App() {
       })[0] || routineTemplates[0]
   }, [progress.customRoutines, progress.routineStats])
 
+  const refreshConcepts = async () => {
+    try {
+      const result = await listConcepts()
+      setCustomConcepts(result.items || [])
+    } catch {
+      // Keep the local vocabulary already loaded.
+    }
+  }
+
   useEffect(() => {
     let mounted = true
 
@@ -481,7 +490,7 @@ export default function App() {
         {adultTab === 'rutinas' && <RoutinesPanel progress={progress} onStart={setActiveRoutine} onChange={commitProgress} />}
         {adultTab === 'vida-real' && <GeneralizationPanel progress={progress} words={allVocabulary} onChange={commitProgress} />}
         {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
-        {adultTab === 'cuenta' && <AccountPanel progress={progress} onProgressChange={commitProgress} />}
+        {adultTab === 'cuenta' && <AccountPanel progress={progress} onProgressChange={commitProgress} onAccountReady={refreshConcepts} />}
       </main>
       {activeRoutine && (
         <RoutineRunner
