@@ -37,6 +37,7 @@ function normalizeConcept(input, id) {
     word,
     emoji: input.emoji?.trim() || '⭐',
     category: input.category?.trim() || 'Personal',
+    priority: Boolean(input.priority),
     syllables: String(input.syllables || '')
       .split(/[-,\s]+/)
       .map(value => value.trim().toUpperCase())
