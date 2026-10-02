@@ -17,6 +17,7 @@ import RoutineRunner from './components/RoutineRunner'
 import AdultGate from './components/AdultGate'
 import SentenceMission from './components/SentenceMission'
 import GeneralizationPanel from './components/GeneralizationPanel'
+import { routineTemplates } from './data/routines'
 import { listConcepts } from './services/libraryService'
 import { getSessionVocabulary, getVocabularySummary, pickAdaptiveWord } from './services/vocabularyEngine'
 import { applySkillProgression } from './services/skillProgression'
@@ -161,6 +162,47 @@ export default function App() {
       return
     }
     setShowAdultGate(true)
+  }
+
+  const completeRoutine = (routine) => {
+    const old = progress.routineStats?.[routine.id] || { completions: 0 }
+    const next = {
+      ...progress,
+      routineStats: {
+        ...(progress.routineStats || {}),
+        [routine.id]: {
+          completions: old.completions + 1,
+          lastAt: new Date().toISOString(),
+        },
+      },
+      events: [
+        ...(progress.events || []),
+        {
+          id: crypto.randomUUID(),
+          at: new Date().toISOString(),
+          skillId: 'autonomia-1',
+          itemId: routine.id,
+          correct: true,
+          helpLevel: 0,
+          responseMs: null,
+        },
+      ].slice(-600),
+    }
+    commitProgress(next)
+    setActiveRoutine(null)
+  }
+
+  if (showAdultGate) {
+    return (
+      <AdultGate
+        onCancel={() => setShowAdultGate(false)}
+        onSuccess={() => {
+          setAdultUnlocked(true)
+          setShowAdultGate(false)
+          setMode('adult')
+        }}
+      />
+    )
   }
 
   const resetData = () => {
