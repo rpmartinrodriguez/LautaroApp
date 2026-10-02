@@ -8,6 +8,8 @@ import { getRecommendedMission, getUnlockedSkillIndex } from './services/adaptiv
 import InstallPWA from './components/InstallPWA'
 import ConceptLibrary from './components/ConceptLibrary'
 import PronunciationControls from './components/PronunciationControls'
+import GuidedSession from './components/GuidedSession'
+import TracePad from './components/TracePad'
 import { listConcepts } from './services/libraryService'
 
 const heroBadges = [
@@ -32,6 +34,8 @@ export default function App() {
   const [feedback, setFeedback] = useState(null)
   const [adultTab, setAdultTab] = useState('plan')
   const [showAssessment, setShowAssessment] = useState(false)
+  const [showGuidedSession, setShowGuidedSession] = useState(false)
+  const [traceItem, setTraceItem] = useState(null)
   const [customConcepts, setCustomConcepts] = useState([])
   const [syncStatus, setSyncStatus] = useState('connecting')
   const badge = getBadge(progress.xp)
@@ -176,7 +180,10 @@ export default function App() {
                 <p>{recommendedMission.subtitle}</p>
                 <small>Estamos trabajando: {recommendedMission.curriculum.title}</small>
               </div>
-              <button className="primary" onClick={() => startExercise(recommendedMission.type)}>Empezar</button>
+              <div className="recommended-actions">
+                <button className="primary" onClick={() => setShowGuidedSession(true)}>Entrenamiento guiado</button>
+                <button className="recommended-secondary" onClick={() => startExercise(recommendedMission.type)}>Solo esta misión</button>
+              </div>
             </section>
           ) : (
             <section className="assessment-reminder">
@@ -208,6 +215,11 @@ export default function App() {
               <span><b>Cantidad</b><small>Contá y elegí</small></span>
               <em>+10 XP</em>
             </button>
+            <button className="mission-card mission-red" onClick={() => setTraceItem(trainingWords[0] || starterWords[0])}>
+              <span className="mission-icon">✍️</span>
+              <span><b>Precisión</b><small>Repasá una palabra con el dedo</small></span>
+              <em>TRAZO</em>
+            </button>
           </div>
 
           <section className="power-path">
@@ -220,6 +232,30 @@ export default function App() {
             </div>
           </section>
         </main>
+        {showGuidedSession && (
+          <GuidedSession
+            words={trainingWords}
+            progress={progress}
+            focusMission={recommendedMission}
+            onCommit={commitProgress}
+            onClose={() => setShowGuidedSession(false)}
+          />
+        )}
+        {traceItem && (
+          <TracePad
+            item={traceItem}
+            onClose={() => setTraceItem(null)}
+            onDone={(item) => {
+              const next = recordAttempt(progress, {
+                skillId: 'escritura-1',
+                itemId: item.id || item.word,
+                correct: true,
+              })
+              commitProgress(next)
+              setTraceItem(null)
+            }}
+          />
+        )}
       </div>
     )
   }
@@ -254,9 +290,18 @@ export default function App() {
         {adultTab === 'plan' && <PlanPanel progress={progress} onStartAssessment={() => setShowAssessment(true)} />}
         {adultTab === 'ruta' && <RoutePanel progress={progress} />}
         {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} />}
-        {adultTab === 'sesion' && <SessionPanel onStart={() => startExercise('visual')} />}
+        {adultTab === 'sesion' && <SessionPanel onStart={() => setShowGuidedSession(true)} />}
         {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
       </main>
+      {showGuidedSession && (
+        <GuidedSession
+          words={trainingWords}
+          progress={progress}
+          focusMission={recommendedMission}
+          onCommit={commitProgress}
+          onClose={() => setShowGuidedSession(false)}
+        />
+      )}
       {showAssessment && (
         <AssessmentFlow
           progress={progress}
