@@ -86,6 +86,16 @@ export default function App() {
     [allVocabulary, progress.wordStats],
   )
 
+  const recommendedRoutine = useMemo(() => {
+    const routines = [...routineTemplates, ...(progress.customRoutines || [])]
+    return routines
+      .sort((a,b) => {
+        const aCount = progress.routineStats?.[a.id]?.completions || 0
+        const bCount = progress.routineStats?.[b.id]?.completions || 0
+        return aCount - bCount
+      })[0] || routineTemplates[0]
+  }, [progress.customRoutines, progress.routineStats])
+
   useEffect(() => {
     let mounted = true
 
@@ -342,9 +352,9 @@ export default function App() {
               <span><b>Comunicar</b><small>Decir lo que necesito</small></span>
               <em>HABLAR</em>
             </button>
-            <button className="mission-card mission-routine" onClick={() => setActiveRoutine(routineTemplates[0])}>
+            <button className="mission-card mission-routine" onClick={() => setActiveRoutine(recommendedRoutine)}>
               <span className="mission-icon">🧭</span>
-              <span><b>Rutina</b><small>Practicamos un paso de la vida diaria</small></span>
+              <span><b>Rutina</b><small>{recommendedRoutine?.title || 'Practicamos la vida diaria'}</small></span>
               <em>AUTONOMÍA</em>
             </button>
           </div>
