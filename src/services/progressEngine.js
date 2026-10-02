@@ -58,17 +58,20 @@ export function recordAttempt(progress, { skillId, itemId, correct, helpLevel = 
     recentResults: [],
   }
 
-  const wordStats = {
-    ...progress.wordStats,
-    [key]: {
-      attempts: old.attempts + 1,
-      correct: old.correct + (correct ? 1 : 0),
-      help: (old.help || 0) + helpLevel,
-      correctStreak: correct ? (old.correctStreak || 0) + 1 : 0,
-      recentResults: [...(old.recentResults || []), !!correct].slice(-5),
-      lastAt: new Date().toISOString(),
-    },
-  }
+  const shouldTrackWord = !String(key).startsWith('cantidad-')
+  const wordStats = shouldTrackWord
+    ? {
+        ...progress.wordStats,
+        [key]: {
+          attempts: old.attempts + 1,
+          correct: old.correct + (correct ? 1 : 0),
+          help: (old.help || 0) + helpLevel,
+          correctStreak: correct ? (old.correctStreak || 0) + 1 : 0,
+          recentResults: [...(old.recentResults || []), !!correct].slice(-5),
+          lastAt: new Date().toISOString(),
+        },
+      }
+    : progress.wordStats
 
   const skillOld = progress.skillStats[skillId] || {
     attempts: 0,
