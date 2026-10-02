@@ -2,7 +2,7 @@
 
 PWA educativa personalizada para Lautaro, organizada como una **Base de Héroes**: misiones cortas, progresión gradual y un panel adulto que explica qué trabajar, por qué y cuándo avanzar.
 
-## Estado actual — MVP 0.4
+## Estado actual — MVP 0.5
 
 Incluye:
 
@@ -117,3 +117,29 @@ La escala no pretende medir inteligencia ni asignar una edad mental:
 - **Todavía no**: 0 puntos.
 
 Se utiliza únicamente para ordenar el punto de partida y las prioridades de práctica.
+
+
+## Pronunciación guiada
+
+Las actividades de palabras incluyen cuatro modos de apoyo oral usando la síntesis de voz disponible en el dispositivo:
+
+- **Normal**: reproduce la palabra completa.
+- **Despacio**: reduce la velocidad de reproducción.
+- **Sílabas**: reproduce cada sílaba con una pausa y luego la palabra completa.
+- **Repetí conmigo**: guía una secuencia de escucha, sílabas con tiempo para repetir y palabra final.
+
+Las sílabas cargadas manualmente en la Biblioteca tienen prioridad. Esto permite ajustar palabras particulares a la forma en que el equipo adulto quiera trabajarlas.
+
+## Entrenamiento guiado
+
+Desde el modo Lautaro o desde **Sesión de hoy**, la app puede ejecutar una sesión breve y secuenciada sin que el adulto tenga que elegir ejercicio por ejercicio. Combina:
+
+1. reconocimiento visual;
+2. objetivo principal del plan;
+3. pronunciación silábica;
+4. sonidos;
+5. construcción de palabra;
+6. cantidad;
+7. cierre con una tarea de generalización fuera de la pantalla.
+
+También se añadió una actividad táctil para repasar palabras con el dedo o lápiz digital.
