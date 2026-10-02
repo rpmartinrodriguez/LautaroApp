@@ -324,6 +324,7 @@ export default function App() {
           ['plan','Mi plan'],
           ['ruta','Ruta completa'],
           ['progreso','Progreso'],
+          ['informe','Informe semanal'],
           ['sesion','Sesión de hoy'],
           ['biblioteca','Biblioteca'],
         ].map(([id,label]) => (
@@ -335,6 +336,7 @@ export default function App() {
         {adultTab === 'plan' && <PlanPanel progress={progress} onStartAssessment={() => setShowAssessment(true)} />}
         {adultTab === 'ruta' && <RoutePanel progress={progress} />}
         {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} vocabularySummary={vocabularySummary} />}
+        {adultTab === 'informe' && <WeeklyReport progress={progress} vocabularySummary={vocabularySummary} />}
         {adultTab === 'sesion' && <SessionPanel onStart={() => setShowGuidedSession(true)} />}
         {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
       </main>
