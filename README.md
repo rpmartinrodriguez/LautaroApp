@@ -2,7 +2,7 @@
 
 PWA educativa personalizada para Lautaro, organizada como una **Base de Héroes**: misiones cortas, progresión gradual y un panel adulto que explica qué trabajar, por qué y cuándo avanzar.
 
-## Estado actual — MVP 0.1
+## Estado actual — MVP 0.4
 
 Incluye:
 
@@ -20,6 +20,12 @@ Incluye:
 - Estadísticas iniciales por palabra y habilidad.
 - Propuesta de sesión diaria de 25–30 minutos.
 - Estructura PWA y funcionamiento offline básico.
+- Evaluación inicial guiada y reanudable.
+- Plan individual generado a partir de habilidades concretas.
+- Misiones recomendadas según la prioridad actual.
+- Biblioteca personal de palabras, fotos y sílabas con Firebase Storage.
+- Instalación PWA guiada en dispositivos compatibles.
+- Build check automático con GitHub Actions.
 
 ## Principio pedagógico
 
@@ -90,3 +96,24 @@ Cuando se active la biblioteca de fotos y audios, publicar también `storage.rul
 ### Sin conexión
 
 La app conserva `localStorage` como respaldo inmediato. Si Firebase no está disponible, el entrenamiento continúa en el dispositivo. Al reconectar, la app intenta sincronizar el snapshot de progreso.
+
+
+## Flujo actual recomendado
+
+1. El adulto abre **Mi plan**.
+2. Realiza la **Evaluación inicial guiada**. Puede pausarla y continuar más tarde.
+3. La app genera una línea de base por áreas y un orden de trabajo.
+4. En el modo Lautaro aparece una **Misión recomendada** según el plan.
+5. El adulto puede cargar palabras y fotos reales desde **Biblioteca**.
+6. Esos conceptos personalizados pasan a formar parte de las misiones.
+7. El progreso se conserva localmente y se sincroniza con Firestore cuando Firebase está disponible.
+
+### Escala de la evaluación inicial
+
+La escala no pretende medir inteligencia ni asignar una edad mental:
+
+- **Lo hace solo**: 2 puntos.
+- **Lo hace con ayuda**: 1 punto.
+- **Todavía no**: 0 puntos.
+
+Se utiliza únicamente para ordenar el punto de partida y las prioridades de práctica.
