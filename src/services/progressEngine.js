@@ -14,6 +14,7 @@ export const defaultProgress = {
   streak: 0,
   currentSkill: 'comprension-1',
   sessions: [],
+  events: [],
   wordStats: {},
   skillStats: {},
   assessment: defaultAssessment,
@@ -31,6 +32,7 @@ export function loadProgress() {
         answers: stored.assessment?.answers || {},
       },
       sessions: stored.sessions || [],
+      events: stored.events || [],
       wordStats: stored.wordStats || {},
       skillStats: stored.skillStats || {},
     }
@@ -87,11 +89,22 @@ export function recordAttempt(progress, { skillId, itemId, correct, helpLevel = 
     },
   }
 
+  const event = {
+    id: crypto.randomUUID(),
+    at: new Date().toISOString(),
+    skillId,
+    itemId: key,
+    correct: !!correct,
+    helpLevel,
+    responseMs,
+  }
+
   const next = {
     ...progress,
     xp: progress.xp + (correct ? 5 : 1),
     wordStats,
     skillStats,
+    events: [...(progress.events || []), event].slice(-600),
   }
 
   saveProgress(next)
