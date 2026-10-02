@@ -162,7 +162,7 @@ export default function App() {
     setMode('exercise')
   }
 
-  const answer = (word, skillId = 'visual-1') => {
+  const answer = (word, skillId = 'visual-1', helpLevel = 0) => {
     if (!exercise || feedback) return
     const correct = exercise.type === 'sound'
       ? word.letter === exercise.target.word[0].toUpperCase()
@@ -171,7 +171,7 @@ export default function App() {
       skillId,
       itemId: exercise.target.id,
       correct,
-      helpLevel: 0,
+      helpLevel,
       responseMs: Date.now() - exercise.startedAt,
     })
     commitProgress(next)
@@ -532,15 +532,17 @@ export default function App() {
 }
 
 function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack, progress, onCommit }) {
+  const [helpUsed, setHelpUsed] = useState(false)
   if (exercise.type === 'build') {
     return <BuildExercise
       exercise={exercise}
       onBack={onBack}
       onNext={onNext}
-      onResult={(correct) => onCommit(recordAttempt(progress, {
+      onResult={(correct, helpLevel = 0) => onCommit(recordAttempt(progress, {
         skillId: 'construccion-1',
         itemId: exercise.target.id,
         correct,
+        helpLevel,
       }))}
     />
   }
@@ -573,11 +575,11 @@ function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack, progress, 
           <VisualCue item={exercise.target} />
           <p className="kicker">MISIÓN DE OBSERVACIÓN</p>
           <h2>{instruction}</h2>
-          <PronunciationControls item={exercise.target} />
+          <PronunciationControls item={exercise.target} onSupportUse={() => setHelpUsed(true)} />
 
           <div className="answer-grid">
             {exercise.options.map(w => (
-              <button key={w.id} disabled={!!feedback} onClick={() => onAnswer(w, exercise.type === 'sound' ? 'fonologia-1' : 'visual-1')}>
+              <button key={w.id} disabled={!!feedback} onClick={() => onAnswer(w, exercise.type === 'sound' ? 'fonologia-1' : 'visual-1', helpUsed ? 1 : 0)}>
                 {w.word}
               </button>
             ))}
