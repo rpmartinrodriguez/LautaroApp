@@ -409,3 +409,34 @@ details{background:#f8fafc;border-radius:12px;padding:10px 12px}summary{cursor:p
   .account-tabs{width:100%;overflow:auto}
   .account-form,.account-form.compact-account{grid-template-columns:1fr}
 }
+
+.mission-memory{background:#e5ecff}
+.mission-talk{background:#e0f5ee}
+
+.memory-shell,.communication-shell{width:min(780px,100%);background:white;border-radius:28px;padding:28px;box-shadow:0 35px 100px rgba(0,0,0,.32);text-align:center}
+.memory-shell header,.communication-shell header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;text-align:left}
+.memory-sequence{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:26px 0}
+.memory-visual{width:150px;height:150px;border-radius:24px;overflow:hidden;background:#eef3f8;border:1px solid #dce4ef}
+.memory-visual img{width:100%;height:100%;object-fit:cover}
+.memory-visual.compact{width:66px;height:66px;border-radius:14px}
+.memory-emoji{width:150px;height:150px;border-radius:24px;background:#f2f5fa;display:grid;place-items:center;font-size:70px}
+.memory-emoji.compact{width:66px;height:66px;font-size:34px;border-radius:14px}
+.memory-options{display:grid;gap:12px;margin-top:22px}
+.memory-options>button{border:2px solid #dce4ef;background:white;border-radius:18px;padding:12px;display:flex;gap:10px;justify-content:center;cursor:pointer}
+.memory-options>button:hover{border-color:#7897dc;background:#f6f8ff}
+
+.communication-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px 0}
+.communication-grid button{border:2px solid #dfe6ee;background:#fbfcfe;border-radius:18px;padding:20px;display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;color:#18233a}
+.communication-grid button span{font-size:36px}
+.communication-grid button b{font-size:18px}
+.communication-grid button:hover{border-color:#6e92db;background:#f3f7ff}
+.communication-selected{background:#edf5ff;border-radius:20px;padding:18px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left}
+.communication-selected>span{font-size:38px}
+.communication-selected>div{display:flex;gap:8px}
+
+@media(max-width:800px){
+  .memory-shell,.communication-shell{min-height:100vh;border-radius:0}
+  .communication-grid{grid-template-columns:1fr}
+  .communication-selected{grid-template-columns:auto 1fr}
+  .communication-selected>div{grid-column:1/-1}
+}
