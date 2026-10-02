@@ -22,7 +22,8 @@ export function wordLearningStatus(progress, word) {
     stat.attempts >= MASTER_ATTEMPTS &&
     acc >= 80 &&
     recentAccuracy >= 80 &&
-    (stat.correctStreak || 0) >= MASTER_STREAK
+    (stat.correctStreak || 0) >= MASTER_STREAK &&
+    ((stat.help || 0) / stat.attempts) <= 0.4
   ) return 'mastered'
 
   if (acc < 60 && stat.attempts >= 4) return 'needs-help'
@@ -38,7 +39,7 @@ export function getUnlockedVocabularyTier(progress, words = []) {
     const recentAccuracy = recent.length
       ? Math.round((recent.filter(Boolean).length / recent.length) * 100)
       : acc
-    return stat.attempts >= MASTER_ATTEMPTS && acc >= 80 && recentAccuracy >= 80 && (stat.correctStreak || 0) >= MASTER_STREAK
+    return stat.attempts >= MASTER_ATTEMPTS && acc >= 80 && recentAccuracy >= 80 && (stat.correctStreak || 0) >= MASTER_STREAK && ((stat.help || 0) / stat.attempts) <= 0.4
   }).length
 
   if (masteredCount >= 28) return 5
