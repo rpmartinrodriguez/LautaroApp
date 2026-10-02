@@ -410,6 +410,8 @@ export default function App() {
           ['progreso','Progreso'],
           ['informe','Informe semanal'],
           ['sesion','Sesión de hoy'],
+          ['rutinas','Rutinas'],
+          ['vida-real','Vida real'],
           ['biblioteca','Biblioteca'],
         ].map(([id,label]) => (
           <button key={id} className={adultTab===id?'active':''} onClick={() => setAdultTab(id)}>{label}</button>
@@ -422,8 +424,17 @@ export default function App() {
         {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} vocabularySummary={vocabularySummary} />}
         {adultTab === 'informe' && <WeeklyReport progress={progress} vocabularySummary={vocabularySummary} />}
         {adultTab === 'sesion' && <SessionPanel onStart={() => setShowGuidedSession(true)} />}
+        {adultTab === 'rutinas' && <RoutinesPanel progress={progress} onStart={setActiveRoutine} onChange={commitProgress} />}
+        {adultTab === 'vida-real' && <GeneralizationPanel progress={progress} words={allVocabulary} onChange={commitProgress} />}
         {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
       </main>
+      {activeRoutine && (
+        <RoutineRunner
+          routine={activeRoutine}
+          onClose={() => setActiveRoutine(null)}
+          onComplete={completeRoutine}
+        />
+      )}
       {showGuidedSession && (
         <GuidedSession
           words={trainingWords}
