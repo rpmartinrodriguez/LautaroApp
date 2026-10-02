@@ -91,7 +91,15 @@ export default function App() {
   const startExercise = (type = 'visual') => {
     const source = trainingWords.length ? trainingWords : starterWords
     const target = source[Math.floor(Math.random() * source.length)]
-    const options = shuffle([target, ...shuffle(source.filter(w => w.id !== target.id)).slice(0, 2)])
+    let options = shuffle([target, ...shuffle(source.filter(w => w.id !== target.id)).slice(0, 2)])
+
+    if (type === 'sound') {
+      const targetLetter = target.word[0].toUpperCase()
+      const alphabet = ['A','E','I','O','U','M','P','L','S','T','C','D','F','G']
+      const distractors = shuffle(alphabet.filter(letter => letter !== targetLetter)).slice(0, 2)
+      options = shuffle([targetLetter, ...distractors]).map(letter => ({ id: 'letter-' + letter, word: letter, letter }))
+    }
+
     setExercise({ type, target, options, startedAt: Date.now() })
     setFeedback(null)
     setMode('exercise')
@@ -99,7 +107,9 @@ export default function App() {
 
   const answer = (word, skillId = 'visual-1') => {
     if (!exercise || feedback) return
-    const correct = word.id === exercise.target.id
+    const correct = exercise.type === 'sound'
+      ? word.letter === exercise.target.word[0].toUpperCase()
+      : word.id === exercise.target.id
     const next = recordAttempt(progress, {
       skillId,
       itemId: exercise.target.id,
@@ -239,6 +249,17 @@ export default function App() {
             focusMission={recommendedMission}
             onCommit={commitProgress}
             onClose={() => setShowGuidedSession(false)}
+            onFinish={() => {
+              const next = {
+                ...progress,
+                sessions: [
+                  ...(progress.sessions || []),
+                  { id: crypto.randomUUID(), type: 'guided', completedAt: new Date().toISOString(), focusSkill: recommendedMission.skillId },
+                ],
+              }
+              commitProgress(next)
+              setShowGuidedSession(false)
+            }}
           />
         )}
         {traceItem && (
@@ -300,6 +321,17 @@ export default function App() {
           focusMission={recommendedMission}
           onCommit={commitProgress}
           onClose={() => setShowGuidedSession(false)}
+          onFinish={() => {
+            const next = {
+              ...progress,
+              sessions: [
+                ...(progress.sessions || []),
+                { id: crypto.randomUUID(), type: 'guided', completedAt: new Date().toISOString(), focusSkill: recommendedMission.skillId },
+              ],
+            }
+            commitProgress(next)
+            setShowGuidedSession(false)
+          }}
         />
       )}
       {showAssessment && (
