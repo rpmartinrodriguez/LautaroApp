@@ -29,9 +29,9 @@ export function wordLearningStatus(progress, word) {
   return 'learning'
 }
 
-export function getUnlockedVocabularyTier(progress) {
-  const stats = progress?.wordStats || {}
-  const masteredCount = Object.values(stats).filter(stat => {
+export function getUnlockedVocabularyTier(progress, words = []) {
+  const masteredCount = words.filter(word => {
+    const stat = statFor(progress, word)
     if (!stat?.attempts) return false
     const acc = Math.round((stat.correct / stat.attempts) * 100)
     const recent = Array.isArray(stat.recentResults) ? stat.recentResults : []
@@ -49,7 +49,7 @@ export function getUnlockedVocabularyTier(progress) {
 }
 
 export function buildVocabularyState(words, progress) {
-  const unlockedTier = getUnlockedVocabularyTier(progress)
+  const unlockedTier = getUnlockedVocabularyTier(progress, words)
 
   const normalized = words.map((word, index) => ({
     ...word,
