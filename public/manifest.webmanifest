@@ -1,0 +1,10 @@
+{
+  "name": "Base de Héroes · Lautaro",
+  "short_name": "Lautaro",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#15213b",
+  "lang": "es-AR",
+  "icons": []
+}
