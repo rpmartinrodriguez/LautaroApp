@@ -313,6 +313,16 @@ export default function App() {
               <span><b>Precisión</b><small>Repasá una palabra con el dedo</small></span>
               <em>TRAZO</em>
             </button>
+            <button className="mission-card mission-reading" onClick={() => setShowSentenceMission(true)}>
+              <span className="mission-icon">📖</span>
+              <span><b>Frases</b><small>Juntamos palabras para entender mensajes</small></span>
+              <em>LECTURA</em>
+            </button>
+            <button className="mission-card mission-routine" onClick={() => setActiveRoutine(routineTemplates[0])}>
+              <span className="mission-icon">🧭</span>
+              <span><b>Rutina</b><small>Practicamos un paso de la vida diaria</small></span>
+              <em>AUTONOMÍA</em>
+            </button>
           </div>
 
           <section className="power-path">
@@ -325,6 +335,21 @@ export default function App() {
             </div>
           </section>
         </main>
+        {showSentenceMission && (
+          <SentenceMission
+            words={allVocabulary}
+            progress={progress}
+            onCommit={commitProgress}
+            onClose={() => setShowSentenceMission(false)}
+          />
+        )}
+        {activeRoutine && (
+          <RoutineRunner
+            routine={activeRoutine}
+            onClose={() => setActiveRoutine(null)}
+            onComplete={completeRoutine}
+          />
+        )}
         {showGuidedSession && (
           <GuidedSession
             words={trainingWords}
