@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { curriculum, starterWords } from './data/curriculum'
+import { curriculum } from './data/curriculum'
+import { builtInWordBank, starterWords } from './data/wordBank'
 import { accuracy, defaultProgress, loadProgress, masteryStatus, recordAttempt, saveProgress } from './services/progressEngine'
 import { loadCloudProgress, mergeProgress, saveCloudProgress } from './services/cloudProgress'
 import AssessmentFlow from './components/AssessmentFlow'
@@ -11,6 +12,8 @@ import PronunciationControls from './components/PronunciationControls'
 import GuidedSession from './components/GuidedSession'
 import TracePad from './components/TracePad'
 import { listConcepts } from './services/libraryService'
+import { getSessionVocabulary, getVocabularySummary, pickAdaptiveWord } from './services/vocabularyEngine'
+import { applySkillProgression } from './services/skillProgression'
 
 const heroBadges = [
   { min: 0, label: 'Aprendiz', icon: '🛡️' },
@@ -41,13 +44,30 @@ export default function App() {
   const badge = getBadge(progress.xp)
   const recommendedMission = getRecommendedMission(progress)
   const unlockedSkillIndex = getUnlockedSkillIndex(progress)
-  const trainingWords = useMemo(() => {
-    const map = new Map(starterWords.map(item => [item.word, item]))
+  const allVocabulary = useMemo(() => {
+    const map = new Map(builtInWordBank.map(item => [item.word, item]))
     customConcepts.forEach(item => {
-      if (item?.word) map.set(item.word.toUpperCase(), { ...item, word: item.word.toUpperCase() })
+      if (item?.word) {
+        map.set(item.word.toUpperCase(), {
+          ...item,
+          word: item.word.toUpperCase(),
+          source: 'custom',
+          tier: Number(item.tier || 1),
+        })
+      }
     })
     return [...map.values()]
   }, [customConcepts])
+
+  const trainingWords = useMemo(
+    () => getSessionVocabulary(allVocabulary, progress, 8),
+    [allVocabulary, progress.wordStats],
+  )
+
+  const vocabularySummary = useMemo(
+    () => getVocabularySummary(allVocabulary, progress),
+    [allVocabulary, progress.wordStats],
+  )
 
   useEffect(() => {
     let mounted = true
@@ -80,17 +100,18 @@ export default function App() {
   }, [])
 
   const commitProgress = (next) => {
-    saveProgress(next)
-    setProgress(next)
+    const progressed = applySkillProgression(next)
+    saveProgress(progressed)
+    setProgress(progressed)
     setSyncStatus('syncing')
-    saveCloudProgress(next)
+    saveCloudProgress(progressed)
       .then(result => setSyncStatus(result.enabled ? 'synced' : (result.reason === 'not-configured' ? 'not-configured' : 'offline')))
       .catch(() => setSyncStatus('offline'))
   }
 
   const startExercise = (type = 'visual') => {
     const source = trainingWords.length ? trainingWords : starterWords
-    const target = source[Math.floor(Math.random() * source.length)]
+    const target = pickAdaptiveWord(source, progress)
     let options = shuffle([target, ...shuffle(source.filter(w => w.id !== target.id)).slice(0, 2)])
 
     if (type === 'sound') {
@@ -311,7 +332,7 @@ export default function App() {
       <main className="adult-main">
         {adultTab === 'plan' && <PlanPanel progress={progress} onStartAssessment={() => setShowAssessment(true)} />}
         {adultTab === 'ruta' && <RoutePanel progress={progress} />}
-        {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} />}
+        {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} vocabularySummary={vocabularySummary} />}
         {adultTab === 'sesion' && <SessionPanel onStart={() => setShowGuidedSession(true)} />}
         {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
       </main>
@@ -492,14 +513,28 @@ function SyncPill({ status }) {
   return <div className={'sync-pill ' + status}><span>{icon}</span><small>{label}</small></div>
 }
 
-function ProgressPanel({ progress, onReset, syncStatus }) {
+function ProgressPanel({ progress, onReset, syncStatus, vocabularySummary }) {
   const rows = starterWords.map(w => ({...w, stat: progress.wordStats[w.id]}))
   return (
     <div className="dashboard">
       <section className="cloud-card"><div><b>Estado del respaldo</b><p>{syncStatus === 'synced' ? 'El progreso de este dispositivo está sincronizado con Firebase.' : syncStatus === 'not-configured' ? 'Faltan las variables de Firebase en Netlify.' : syncStatus === 'connecting' || syncStatus === 'syncing' ? 'Estamos sincronizando el progreso…' : 'La app sigue funcionando localmente y reintentará cuando haya conexión.'}</p></div><SyncPill status={syncStatus} /></section>
       <div className="stat-card"><span>⚡</span><b>{progress.xp}</b><small>Experiencia total</small></div>
       <div className="stat-card"><span>🎯</span><b>{Object.values(progress.skillStats).reduce((a,s)=>a+s.attempts,0)}</b><small>Intentos registrados</small></div>
-      <div className="stat-card"><span>📚</span><b>{rows.filter(r => accuracy(r.stat)>=80 && (r.stat?.attempts||0)>=5).length}</b><small>Palabras avanzando</small></div>
+      <div className="stat-card"><span>📚</span><b>{vocabularySummary?.mastered || 0}</b><small>Palabras dominadas</small></div>
+      <section className="vocab-summary-card">
+        <div>
+          <p className="kicker">VOCABULARIO ADAPTATIVO</p>
+          <h3>Nivel de palabras {vocabularySummary?.tier || 1}</h3>
+          <p>La app mezcla palabras nuevas, palabras en aprendizaje y repasos. No debería repetir siempre el mismo grupo.</p>
+        </div>
+        <div className="vocab-counters">
+          <span><b>{vocabularySummary?.learning || 0}</b><small>en aprendizaje</small></span>
+          <span><b>{vocabularySummary?.newAvailable || 0}</b><small>nuevas disponibles</small></span>
+        </div>
+        <div className="active-vocab">
+          {(vocabularySummary?.active || []).map(word => <span key={word}>{word}</span>)}
+        </div>
+      </section>
 
       <section className="table-card">
         <h3>Palabras iniciales</h3>
