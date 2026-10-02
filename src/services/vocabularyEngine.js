@@ -84,10 +84,10 @@ export function getSessionVocabulary(words, progress, size = 6) {
     .filter(word => word.learningStatus === 'needs-help')
     .sort((a,b) => (a.stat?.lastAt || '').localeCompare(b.stat?.lastAt || ''))
 
-  const activeLearning = shuffle(state.learning.filter(word => word.learningStatus !== 'needs-help'))
+  const activeLearning = shuffle(state.learning.filter(word => word.learningStatus !== 'needs-help')).sort((a,b) => Number(Boolean(b.priority)) - Number(Boolean(a.priority)))
   const review = shuffle(state.mastered)
   const newCandidates = state.newWords
-    .sort((a,b) => a.tier - b.tier || a.sortIndex - b.sortIndex)
+    .sort((a,b) => Number(Boolean(b.priority)) - Number(Boolean(a.priority)) || a.tier - b.tier || a.sortIndex - b.sortIndex)
     .slice(0, ACTIVE_NEW_LIMIT)
 
   const selected = unique([
@@ -111,7 +111,8 @@ export function pickAdaptiveWord(words, progress) {
 
   pool.forEach(word => {
     const status = wordLearningStatus(progress, word)
-    const weight = status === 'needs-help' ? 5 : status === 'learning' ? 4 : status === 'new' ? 3 : 1
+    const baseWeight = status === 'needs-help' ? 5 : status === 'learning' ? 4 : status === 'new' ? 3 : 1
+    const weight = baseWeight + (word.priority ? 2 : 0)
     for (let i = 0; i < weight; i += 1) weighted.push(word)
   })
 
