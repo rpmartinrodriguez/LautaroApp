@@ -6,6 +6,8 @@ import AssessmentFlow from './components/AssessmentFlow'
 import PlanPanel from './components/PlanPanel'
 import { getRecommendedMission, getUnlockedSkillIndex } from './services/adaptiveEngine'
 import InstallPWA from './components/InstallPWA'
+import ConceptLibrary from './components/ConceptLibrary'
+import { listConcepts } from './services/libraryService'
 
 const heroBadges = [
   { min: 0, label: 'Aprendiz', icon: '🛡️' },
@@ -29,10 +31,18 @@ export default function App() {
   const [feedback, setFeedback] = useState(null)
   const [adultTab, setAdultTab] = useState('plan')
   const [showAssessment, setShowAssessment] = useState(false)
+  const [customConcepts, setCustomConcepts] = useState([])
   const [syncStatus, setSyncStatus] = useState('connecting')
   const badge = getBadge(progress.xp)
   const recommendedMission = getRecommendedMission(progress)
   const unlockedSkillIndex = getUnlockedSkillIndex(progress)
+  const trainingWords = useMemo(() => {
+    const map = new Map(starterWords.map(item => [item.word, item]))
+    customConcepts.forEach(item => {
+      if (item?.word) map.set(item.word.toUpperCase(), { ...item, word: item.word.toUpperCase() })
+    })
+    return [...map.values()]
+  }, [customConcepts])
 
   useEffect(() => {
     let mounted = true
@@ -58,6 +68,9 @@ export default function App() {
     }
 
     connectCloud()
+    listConcepts().then(result => {
+      if (mounted) setCustomConcepts(result.items || [])
+    }).catch(() => {})
     return () => { mounted = false }
   }, [])
 
@@ -71,8 +84,9 @@ export default function App() {
   }
 
   const startExercise = (type = 'visual') => {
-    const target = starterWords[Math.floor(Math.random() * starterWords.length)]
-    const options = shuffle([target, ...shuffle(starterWords.filter(w => w.id !== target.id)).slice(0, 2)])
+    const source = trainingWords.length ? trainingWords : starterWords
+    const target = source[Math.floor(Math.random() * source.length)]
+    const options = shuffle([target, ...shuffle(source.filter(w => w.id !== target.id)).slice(0, 2)])
     setExercise({ type, target, options, startedAt: Date.now() })
     setFeedback(null)
     setMode('exercise')
@@ -240,7 +254,7 @@ export default function App() {
         {adultTab === 'ruta' && <RoutePanel progress={progress} />}
         {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} />}
         {adultTab === 'sesion' && <SessionPanel onStart={() => startExercise('visual')} />}
-        {adultTab === 'biblioteca' && <LibraryPanel />}
+        {adultTab === 'biblioteca' && <ConceptLibrary onLibraryChange={setCustomConcepts} />}
       </main>
       {showAssessment && (
         <AssessmentFlow
@@ -280,7 +294,7 @@ function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack }) {
       </header>
       <main className="exercise-card-wrap">
         <section className="exercise-card">
-          <div className="big-emoji">{exercise.target.emoji}</div>
+          <VisualCue item={exercise.target} />
           <p className="kicker">MISIÓN DE OBSERVACIÓN</p>
           <h2>{instruction}</h2>
           <button className="listen" onClick={speak}>🔊 Escuchar</button>
@@ -321,7 +335,7 @@ function BuildExercise({ exercise, onBack, onNext }) {
       <header className="exercise-top"><button className="ghost light" onClick={onBack}>← Salir</button></header>
       <main className="exercise-card-wrap">
         <section className="exercise-card">
-          <div className="big-emoji">{exercise.target.emoji}</div>
+          <VisualCue item={exercise.target} />
           <p className="kicker">MISIÓN DE CONSTRUCCIÓN</p>
           <h2>Armá la palabra</h2>
           <div className="word-model">{exercise.target.word}</div>
@@ -461,19 +475,10 @@ function SessionPanel({ onStart }) {
   )
 }
 
-function LibraryPanel() {
-  return (
-    <div className="library-card">
-      <div className="library-icon">📸</div>
-      <div>
-        <p className="kicker">BIBLIOTECA PERSONAL</p>
-        <h2>El mundo de Lautaro va a ser el material de aprendizaje</h2>
-        <p>La siguiente versión permitirá cargar fotos reales, grabar voces y convertir cada concepto en ejercicios de lectura, sonidos, construcción, frases y rutinas.</p>
-        <div className="coming-list">
-          <span>Foto real</span><span>Palabra</span><span>Audio</span><span>Sílabas</span><span>Rutina</span>
-        </div>
-        <p className="muted">Esta pantalla ya queda preparada como parte del flujo del producto.</p>
-      </div>
-    </div>
-  )
+
+function VisualCue({ item }) {
+  if (item?.imageUrl) {
+    return <div className="big-visual"><img src={item.imageUrl} alt="" /></div>
+  }
+  return <div className="big-emoji">{item?.emoji || '⭐'}</div>
 }
