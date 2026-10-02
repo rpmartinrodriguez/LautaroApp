@@ -5,6 +5,7 @@ import { loadCloudProgress, mergeProgress, saveCloudProgress } from './services/
 import AssessmentFlow from './components/AssessmentFlow'
 import PlanPanel from './components/PlanPanel'
 import { getRecommendedMission, getUnlockedSkillIndex } from './services/adaptiveEngine'
+import InstallPWA from './components/InstallPWA'
 
 const heroBadges = [
   { min: 0, label: 'Aprendiz', icon: '🛡️' },
@@ -107,7 +108,7 @@ export default function App() {
             <div className="eyebrow">BASE DE HÉROES</div>
             <h1>Lautaro</h1>
           </div>
-          <div className="top-actions"><SyncPill status={syncStatus} /><div className="badge-chip"><span>{badge.icon}</span><b>{badge.label}</b><small>{progress.xp} XP</small></div></div>
+          <div className="top-actions"><InstallPWA /><SyncPill status={syncStatus} /><div className="badge-chip"><span>{badge.icon}</span><b>{badge.label}</b><small>{progress.xp} XP</small></div></div>
         </header>
 
         <main className="home-grid">
