@@ -331,6 +331,16 @@ export default function App() {
               <span><b>Frases</b><small>Juntamos palabras para entender mensajes</small></span>
               <em>LECTURA</em>
             </button>
+            <button className="mission-card mission-memory" onClick={() => setShowMemoryMission(true)}>
+              <span className="mission-icon">🎯</span>
+              <span><b>Memoria</b><small>Mirá, recordá y elegí</small></span>
+              <em>ATENCIÓN</em>
+            </button>
+            <button className="mission-card mission-talk" onClick={() => setShowCommunication(true)}>
+              <span className="mission-icon">💬</span>
+              <span><b>Comunicar</b><small>Decir lo que necesito</small></span>
+              <em>HABLAR</em>
+            </button>
             <button className="mission-card mission-routine" onClick={() => setActiveRoutine(routineTemplates[0])}>
               <span className="mission-icon">🧭</span>
               <span><b>Rutina</b><small>Practicamos un paso de la vida diaria</small></span>
@@ -344,10 +354,21 @@ export default function App() {
               <h3>Los poderes se entrenan de a poco</h3>
             </div>
             <div className="path-line">
-              {['🧠','👀','🔤','👂','🧩','✍️','📖','🔢','🧭'].map((x,i) => <span className={i <= unlockedSkillIndex ? 'done':''} key={i}>{x}</span>)}
+              {['🧠','👀','🔤','👂','🧩','✍️','📖','🎯','🔢','🧭'].map((x,i) => <span className={i <= unlockedSkillIndex ? 'done':''} key={i}>{x}</span>)}
             </div>
           </section>
         </main>
+        {showCommunication && (
+          <CommunicationBoard onClose={() => setShowCommunication(false)} />
+        )}
+        {showMemoryMission && (
+          <MemoryMission
+            words={allVocabulary}
+            progress={progress}
+            onCommit={commitProgress}
+            onClose={() => setShowMemoryMission(false)}
+          />
+        )}
         {showSentenceMission && (
           <SentenceMission
             words={allVocabulary}
