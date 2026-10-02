@@ -13,7 +13,9 @@ export function shouldAdvanceCurrentSkill(progress) {
     ? recent.filter(Boolean).length / recent.length
     : totalAccuracy
 
-  return totalAccuracy >= 0.8 && recentAccuracy >= 0.8 && (stat.correctStreak || 0) >= 3
+  const helpRate = (stat.help || 0) / stat.attempts
+
+  return totalAccuracy >= 0.8 && recentAccuracy >= 0.8 && (stat.correctStreak || 0) >= 3 && helpRate <= 0.4
 }
 
 export function applySkillProgression(progress) {
