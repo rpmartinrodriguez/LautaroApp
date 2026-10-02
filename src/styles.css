@@ -164,3 +164,13 @@ details{background:#f8fafc;border-radius:12px;padding:10px 12px}summary{cursor:p
   .recommended-mission,.assessment-reminder{grid-template-columns:auto 1fr}
   .recommended-mission .primary,.assessment-reminder .secondary{grid-column:1/-1}
 }
+
+.install-button{border:1px solid #dfe6f1;background:white;color:#24385f;border-radius:999px;padding:9px 13px;font-weight:800;cursor:pointer;white-space:nowrap}
+.install-status{border:1px solid #d8ecde;background:#eef8f1;color:#2f6b43;border-radius:999px;padding:9px 13px;font-size:12px;font-weight:900;white-space:nowrap}
+.install-help{position:fixed;right:20px;top:86px;width:min(360px,calc(100vw - 40px));z-index:1100;background:white;border:1px solid #dde5f0;border-radius:18px;padding:18px;box-shadow:0 25px 70px rgba(17,31,60,.22)}
+.install-help>div{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.install-help>div button{border:0;background:#edf1f7;width:30px;height:30px;border-radius:50%;font-size:20px;cursor:pointer}
+.install-help p{margin:7px 0;color:#657188}
+@media(max-width:800px){
+  .top-actions>.install-button,.top-actions>.install-status{display:none}
+}
