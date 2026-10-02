@@ -1,6 +1,5 @@
 import {
   browserLocalPersistence,
-  onAuthStateChanged,
   setPersistence,
   signInAnonymously,
 } from 'firebase/auth'
@@ -13,43 +12,34 @@ import {
 import { auth, db, firebaseConfigured } from './firebase'
 
 const LEARNER_ID = 'lautaro'
-let currentUid = null
-let authReadyPromise = null
+let bootstrapPromise = null
 
 export async function ensureCloudSession() {
   if (!firebaseConfigured || !auth || !db) {
     return { enabled: false, reason: 'not-configured' }
   }
 
-  if (authReadyPromise) return authReadyPromise
+  if (auth.currentUser) {
+    return { enabled: true, uid: auth.currentUser.uid }
+  }
 
-  authReadyPromise = new Promise(async (resolve) => {
-    try {
-      await setPersistence(auth, browserLocalPersistence)
-      const unsubscribe = onAuthStateChanged(auth, async user => {
-        if (user) {
-          currentUid = user.uid
-          unsubscribe()
-          resolve({ enabled: true, uid: user.uid })
-          return
-        }
+  if (!bootstrapPromise) {
+    bootstrapPromise = (async () => {
+      try {
+        await setPersistence(auth, browserLocalPersistence)
+        if (auth.currentUser) return { enabled: true, uid: auth.currentUser.uid }
 
-        try {
-          const credential = await signInAnonymously(auth)
-          currentUid = credential.user.uid
-          unsubscribe()
-          resolve({ enabled: true, uid: credential.user.uid })
-        } catch (error) {
-          unsubscribe()
-          resolve({ enabled: false, reason: error.code || error.message })
-        }
-      })
-    } catch (error) {
-      resolve({ enabled: false, reason: error.code || error.message })
-    }
-  })
+        const credential = await signInAnonymously(auth)
+        return { enabled: true, uid: credential.user.uid }
+      } catch (error) {
+        return { enabled: false, reason: error.code || error.message }
+      }
+    })()
+  }
 
-  return authReadyPromise
+  const result = await bootstrapPromise
+  bootstrapPromise = null
+  return result
 }
 
 function progressRef(uid) {
@@ -79,7 +69,7 @@ export async function saveCloudProgress(progress) {
       learnerId: LEARNER_ID,
       progress,
       updatedAt: serverTimestamp(),
-      schemaVersion: 1,
+      schemaVersion: 2,
     },
     { merge: true },
   )
@@ -91,10 +81,24 @@ export function mergeProgress(localProgress, remoteProgress) {
   if (!remoteProgress) return localProgress
   if (!localProgress) return remoteProgress
 
+  const localEvents = Array.isArray(localProgress.events) ? localProgress.events : []
+  const remoteEvents = Array.isArray(remoteProgress.events) ? remoteProgress.events : []
+  const eventMap = new Map()
+
+  ;[...remoteEvents, ...localEvents].forEach(event => {
+    if (event?.id) eventMap.set(event.id, event)
+  })
+
   const localXp = Number(localProgress.xp || 0)
   const remoteXp = Number(remoteProgress.xp || 0)
+  const base = remoteXp > localXp
+    ? { ...localProgress, ...remoteProgress }
+    : { ...remoteProgress, ...localProgress }
 
-  // MVP: prefer the snapshot with more accumulated work.
-  // Later this will be replaced by event-based multi-device reconciliation.
-  return remoteXp > localXp ? { ...localProgress, ...remoteProgress } : localProgress
+  return {
+    ...base,
+    events: [...eventMap.values()]
+      .sort((a,b) => String(a.at).localeCompare(String(b.at)))
+      .slice(-600),
+  }
 }
