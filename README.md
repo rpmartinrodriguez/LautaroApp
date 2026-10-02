@@ -1,70 +1,79 @@
 # LautaroApp
 
-PWA educativa personalizada para Lautaro, organizada como una **Base de Héroes**: misiones cortas, progresión gradual y un panel adulto que explica qué trabajar, por qué y cuándo avanzar.
+PWA educativa personalizada organizada como una **Base de Héroes**. Combina práctica diaria, progresión adaptativa y un panel adulto para acompañar el aprendizaje sin convertir la app en una evaluación clínica.
 
-## Estado actual — MVP 0.5
+## Estado actual — v0.9
 
-Incluye:
+La aplicación ya incluye:
 
-- Modo Lautaro con estética de misiones de héroe.
-- Reconocimiento visual de palabras.
-- Actividad inicial de sonidos.
-- Construcción de palabras con letras.
-- Conteo de cantidades del 1 al 5.
-- Síntesis de voz del navegador en español.
-- XP e insignias motivacionales.
-- Progreso persistido localmente en el dispositivo.
-- Panel adulto con ruta pedagógica.
-- Criterios explícitos para avanzar.
-- Tareas sugeridas fuera de la pantalla.
-- Estadísticas iniciales por palabra y habilidad.
-- Propuesta de sesión diaria de 25–30 minutos.
-- Estructura PWA y funcionamiento offline básico.
-- Evaluación inicial guiada y reanudable.
-- Plan individual generado a partir de habilidades concretas.
-- Misiones recomendadas según la prioridad actual.
-- Biblioteca personal de palabras, fotos y sílabas con Firebase Storage.
-- Instalación PWA guiada en dispositivos compatibles.
-- Build check automático con GitHub Actions.
+- modo Lautaro con misiones táctiles y visuales;
+- evaluación inicial guiada y reanudable;
+- plan individual por habilidades concretas;
+- vocabulario progresivo de 5 niveles;
+- mezcla automática de palabras nuevas, en aprendizaje, con dificultad y de repaso;
+- palabras personales con foto, sílabas, categoría y prioridad;
+- pronunciación normal, lenta, por sílabas y “repetí conmigo”;
+- registro de cuándo se necesitó apoyo oral;
+- reconocimiento visual de palabras;
+- letras y sonidos;
+- construcción de palabras;
+- trazado táctil;
+- frases progresivas;
+- memoria visual;
+- matemática de cantidad con dificultad adaptativa;
+- tablero de comunicación funcional;
+- rutinas de autonomía prediseñadas y personalizadas;
+- registro de generalización fuera de la app;
+- objetivos indicados por profesionales;
+- informes semanales;
+- sincronización con Firebase;
+- cuenta adulta opcional para recuperar el progreso en otros dispositivos;
+- PIN local para proteger el modo adulto;
+- PWA instalable y soporte offline;
+- actualización de caché preparada para no dejar la app instalada congelada en una versión antigua;
+- verificación automática de compilación con GitHub Actions.
 
-## Principio pedagógico
+## Principio de uso
 
-La app no avanza por edad ni por calendario. El objetivo es progresar cuando una habilidad aparece de manera estable, en diferentes sesiones y con menos ayuda. Los datos son orientativos para acompañar el aprendizaje y no reemplazan la evaluación de profesionales.
+La app no asigna una “edad mental” ni diagnostica. La progresión se basa en habilidades observables y en la estabilidad del desempeño.
 
-## Ejecutar localmente
+Para avanzar de una habilidad a la siguiente se consideran:
 
-```bash
-npm install
-npm run dev
-```
+- cantidad de intentos;
+- porcentaje total;
+- resultados recientes;
+- racha de aciertos;
+- cantidad de ayuda utilizada.
 
-## Compilar
+Las palabras dominadas aparecen menos seguido; las palabras nuevas y las que presentan dificultad reciben mayor prioridad.
 
-```bash
-npm run build
-npm run preview
-```
+## Primer uso recomendado
 
-## Próximas etapas
+1. Entrar al modo adulto y crear el PIN local.
+2. Completar la evaluación inicial.
+3. Cargar 5–10 palabras muy significativas en **Biblioteca**.
+4. Agregar las sílabas manualmente en las palabras que se quieran trabajar en pronunciación.
+5. Marcar como prioridad las palabras especialmente importantes.
+6. Iniciar una sesión desde **Sesión de hoy**.
+7. Registrar en **Vida real** cuando una palabra o habilidad aparezca fuera de la app.
+8. Revisar el **Informe semanal** después de varias sesiones.
 
-1. Evaluación inicial guiada.
-2. Biblioteca personal de fotos, palabras y audios.
-3. Firebase: autenticación, Firestore y Storage.
-4. Motor adaptativo por dominio real, no solo porcentaje global.
-5. Rutinas visuales y autonomía.
-6. Trazado/escritura táctil.
-7. Panel profesional y objetivos compartidos.
-8. Informes semanales y generalización fuera de la app.
-9. Instalación PWA y posterior empaquetado con Capacitor.
+## Pronunciación
 
-## Privacidad
+Los apoyos disponibles son:
 
-En la versión actual el progreso se guarda solamente en `localStorage` del dispositivo. No se suben datos personales a servidores.
+- **Normal**
+- **Despacio**
+- **Sílabas**
+- **Repetí conmigo**
 
+Las sílabas ingresadas manualmente tienen prioridad sobre la separación automática.
 
-## Firebase / Netlify
+El uso de apoyos lentos o silábicos se registra, para evitar que la app considere una habilidad completamente consolidada si todavía depende mucho de ayudas.
 
-La app usa variables de entorno de Vite. Configurarlas en Netlify > Site configuration > Environment variables:
+## Firebase y Netlify
+
+Variables de entorno necesarias en Netlify:
 
 - `VITE_FIREBASE_API_KEY`
 - `VITE_FIREBASE_AUTH_DOMAIN`
@@ -73,73 +82,56 @@ La app usa variables de entorno de Vite. Configurarlas en Netlify > Site configu
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 
-Luego hacer un nuevo deploy para que Vite incorpore las variables.
+Build:
+
+```bash
+npm run build
+```
+
+Publish directory:
+
+```text
+dist
+```
 
 ### Firebase Authentication
 
-Habilitar **Anonymous** en Firebase Console > Authentication > Sign-in method. La versión actual usa una sesión anónima persistente para que Lautaro no tenga que iniciar sesión.
+Habilitar:
 
-### Firestore
+- **Anonymous**
+- **Email/Password** si se quiere usar la cuenta adulta multi-dispositivo.
 
-Crear Cloud Firestore y publicar las reglas incluidas en `firestore.rules`.
+La app empieza con una sesión anónima para que Lautaro no tenga que iniciar sesión. Si el adulto vincula un correo y contraseña, esa misma sesión se convierte en una cuenta persistente manteniendo el UID.
 
-El progreso queda bajo:
+### Firestore y Storage
 
-`users/{uid}/learners/lautaro`
+Publicar las reglas incluidas en:
 
-Las reglas impiden que un usuario autenticado lea o escriba el espacio de otro usuario.
+- `firestore.rules`
+- `storage.rules`
 
-### Storage
+El progreso se guarda bajo el UID autenticado y las reglas impiden que un usuario autenticado lea el espacio de otro usuario.
 
-Cuando se active la biblioteca de fotos y audios, publicar también `storage.rules`.
+## Privacidad
 
-### Sin conexión
+La app conserva una copia local para seguir funcionando sin conexión. Cuando Firebase está configurado, el progreso también se sincroniza con Firestore. Fotos y material personal se almacenan en Firebase Storage dentro del espacio del usuario autenticado.
 
-La app conserva `localStorage` como respaldo inmediato. Si Firebase no está disponible, el entrenamiento continúa en el dispositivo. Al reconectar, la app intenta sincronizar el snapshot de progreso.
+No se debe publicar el proyecto con reglas abiertas de Firestore o Storage.
 
+## Desarrollo local
 
-## Flujo actual recomendado
+```bash
+npm install
+npm run dev
+```
 
-1. El adulto abre **Mi plan**.
-2. Realiza la **Evaluación inicial guiada**. Puede pausarla y continuar más tarde.
-3. La app genera una línea de base por áreas y un orden de trabajo.
-4. En el modo Lautaro aparece una **Misión recomendada** según el plan.
-5. El adulto puede cargar palabras y fotos reales desde **Biblioteca**.
-6. Esos conceptos personalizados pasan a formar parte de las misiones.
-7. El progreso se conserva localmente y se sincroniza con Firestore cuando Firebase está disponible.
+Para verificar producción:
 
-### Escala de la evaluación inicial
+```bash
+npm run build
+npm run preview
+```
 
-La escala no pretende medir inteligencia ni asignar una edad mental:
+## Antes de llamar a esta versión 1.0
 
-- **Lo hace solo**: 2 puntos.
-- **Lo hace con ayuda**: 1 punto.
-- **Todavía no**: 0 puntos.
-
-Se utiliza únicamente para ordenar el punto de partida y las prioridades de práctica.
-
-
-## Pronunciación guiada
-
-Las actividades de palabras incluyen cuatro modos de apoyo oral usando la síntesis de voz disponible en el dispositivo:
-
-- **Normal**: reproduce la palabra completa.
-- **Despacio**: reduce la velocidad de reproducción.
-- **Sílabas**: reproduce cada sílaba con una pausa y luego la palabra completa.
-- **Repetí conmigo**: guía una secuencia de escucha, sílabas con tiempo para repetir y palabra final.
-
-Las sílabas cargadas manualmente en la Biblioteca tienen prioridad. Esto permite ajustar palabras particulares a la forma en que el equipo adulto quiera trabajarlas.
-
-## Entrenamiento guiado
-
-Desde el modo Lautaro o desde **Sesión de hoy**, la app puede ejecutar una sesión breve y secuenciada sin que el adulto tenga que elegir ejercicio por ejercicio. Combina:
-
-1. reconocimiento visual;
-2. objetivo principal del plan;
-3. pronunciación silábica;
-4. sonidos;
-5. construcción de palabra;
-6. cantidad;
-7. cierre con una tarea de generalización fuera de la pantalla.
-
-También se añadió una actividad táctil para repasar palabras con el dedo o lápiz digital.
+Queda principalmente validar el uso real durante varios días, revisar que los criterios adaptativos funcionen bien con datos reales, ajustar vocabulario y rutinas, y corregir cualquier detalle de experiencia que aparezca en iPhone/iPad o Android.
