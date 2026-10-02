@@ -24,6 +24,7 @@ import { routineTemplates } from './data/routines'
 import { listConcepts } from './services/libraryService'
 import { getSessionVocabulary, getVocabularySummary, pickAdaptiveWord } from './services/vocabularyEngine'
 import { applySkillProgression } from './services/skillProgression'
+import { getQuantityMax, quantityOptions } from './services/mathEngine'
 
 const heroBadges = [
   { min: 0, label: 'Aprendiz', icon: '🛡️' },
@@ -424,7 +425,15 @@ export default function App() {
   }
 
   if (mode === 'exercise' && exercise) {
-    return <ExerciseView exercise={exercise} feedback={feedback} onAnswer={answer} onNext={nextExercise} onBack={() => setMode('child')} />
+    return <ExerciseView
+      exercise={exercise}
+      feedback={feedback}
+      onAnswer={answer}
+      onNext={nextExercise}
+      onBack={() => setMode('child')}
+      progress={progress}
+      onCommit={commitProgress}
+    />
   }
 
   return (
@@ -503,9 +512,32 @@ export default function App() {
   )
 }
 
-function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack }) {
-  if (exercise.type === 'build') return <BuildExercise exercise={exercise} onBack={onBack} onNext={onNext} />
-  if (exercise.type === 'quantity') return <QuantityExercise onBack={onBack} onNext={onNext} />
+function ExerciseView({ exercise, feedback, onAnswer, onNext, onBack, progress, onCommit }) {
+  if (exercise.type === 'build') {
+    return <BuildExercise
+      exercise={exercise}
+      onBack={onBack}
+      onNext={onNext}
+      onResult={(correct) => onCommit(recordAttempt(progress, {
+        skillId: 'construccion-1',
+        itemId: exercise.target.id,
+        correct,
+      }))}
+    />
+  }
+
+  if (exercise.type === 'quantity') {
+    return <QuantityExercise
+      progress={progress}
+      onBack={onBack}
+      onNext={onNext}
+      onResult={(correct, count) => onCommit(recordAttempt(progress, {
+        skillId: 'matematica-1',
+        itemId: 'cantidad-' + count,
+        correct,
+      }))}
+    />
+  }
 
   const instruction = exercise.type === 'sound'
     ? '¿Cuál empieza como “' + exercise.target.word[0] + '”?'
