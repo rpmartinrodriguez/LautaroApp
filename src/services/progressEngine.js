@@ -1,5 +1,14 @@
 const KEY = 'lautaro-progress-v1'
 
+export const defaultAssessment = {
+  status: 'not-started',
+  answers: {},
+  startedAt: null,
+  completedAt: null,
+  summary: null,
+  plan: null,
+}
+
 export const defaultProgress = {
   xp: 0,
   streak: 0,
@@ -7,13 +16,29 @@ export const defaultProgress = {
   sessions: [],
   wordStats: {},
   skillStats: {},
+  assessment: defaultAssessment,
 }
 
 export function loadProgress() {
   try {
-    return { ...defaultProgress, ...(JSON.parse(localStorage.getItem(KEY)) || {}) }
+    const stored = JSON.parse(localStorage.getItem(KEY)) || {}
+    return {
+      ...defaultProgress,
+      ...stored,
+      assessment: {
+        ...defaultAssessment,
+        ...(stored.assessment || {}),
+        answers: stored.assessment?.answers || {},
+      },
+      sessions: stored.sessions || [],
+      wordStats: stored.wordStats || {},
+      skillStats: stored.skillStats || {},
+    }
   } catch {
-    return defaultProgress
+    return {
+      ...defaultProgress,
+      assessment: { ...defaultAssessment },
+    }
   }
 }
 
