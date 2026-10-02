@@ -18,6 +18,11 @@ function speak(text, slow = false) {
 export default function SentenceMission({ words, progress, onCommit, onClose }) {
   const available = useMemo(() => getAvailableSentences(words, progress), [words, progress.wordStats])
   const target = useMemo(() => available[Math.floor(Math.random() * available.length)], [available.length])
+  const options = useMemo(() => {
+    if (!target) return []
+    const distractors = shuffle(available.filter(item => item.id !== target.id)).slice(0,2)
+    return shuffle([target, ...distractors])
+  }, [target?.id, available.length])
   const [feedback, setFeedback] = useState(null)
 
   if (!target) {
@@ -32,9 +37,6 @@ export default function SentenceMission({ words, progress, onCommit, onClose }) 
       </div>
     )
   }
-
-  const distractors = shuffle(available.filter(item => item.id !== target.id)).slice(0,2)
-  const options = shuffle([target, ...distractors])
 
   const answer = option => {
     if (feedback) return
