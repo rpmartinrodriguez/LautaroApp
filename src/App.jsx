@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { curriculum, starterWords } from './data/curriculum'
-import { accuracy, loadProgress, masteryStatus, recordAttempt } from './services/progressEngine'
+import { accuracy, defaultProgress, loadProgress, masteryStatus, recordAttempt, saveProgress } from './services/progressEngine'
+import { loadCloudProgress, mergeProgress, saveCloudProgress } from './services/cloudProgress'
 
 const heroBadges = [
   { min: 0, label: 'Aprendiz', icon: '🛡️' },
@@ -23,7 +24,35 @@ export default function App() {
   const [exercise, setExercise] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [adultTab, setAdultTab] = useState('ruta')
+  const [syncStatus, setSyncStatus] = useState('connecting')
   const badge = getBadge(progress.xp)
+
+  useEffect(() => {
+    let mounted = true
+
+    async function connectCloud() {
+      try {
+        const remote = await loadCloudProgress()
+        if (!mounted) return
+
+        if (!remote.enabled) {
+          setSyncStatus(remote.reason === 'not-configured' ? 'not-configured' : 'offline')
+          return
+        }
+
+        const merged = mergeProgress(loadProgress(), remote.progress)
+        saveProgress(merged)
+        setProgress(merged)
+        await saveCloudProgress(merged)
+        if (mounted) setSyncStatus('synced')
+      } catch {
+        if (mounted) setSyncStatus('offline')
+      }
+    }
+
+    connectCloud()
+    return () => { mounted = false }
+  }, [])
 
   const startExercise = (type = 'visual') => {
     const target = starterWords[Math.floor(Math.random() * starterWords.length)]
@@ -44,6 +73,10 @@ export default function App() {
       responseMs: Date.now() - exercise.startedAt,
     })
     setProgress(next)
+    setSyncStatus('syncing')
+    saveCloudProgress(next)
+      .then(result => setSyncStatus(result.enabled ? 'synced' : (result.reason === 'not-configured' ? 'not-configured' : 'offline')))
+      .catch(() => setSyncStatus('offline'))
     setFeedback(correct ? 'correct' : 'retry')
   }
 
@@ -51,8 +84,13 @@ export default function App() {
 
   const resetData = () => {
     if (!confirm('¿Seguro que querés borrar el progreso guardado en este dispositivo?')) return
-    localStorage.removeItem('lautaro-progress-v1')
-    setProgress(loadProgress())
+    const clean = { ...defaultProgress, sessions: [], wordStats: {}, skillStats: {} }
+    saveProgress(clean)
+    setProgress(clean)
+    setSyncStatus('syncing')
+    saveCloudProgress(clean)
+      .then(result => setSyncStatus(result.enabled ? 'synced' : (result.reason === 'not-configured' ? 'not-configured' : 'offline')))
+      .catch(() => setSyncStatus('offline'))
   }
 
   if (mode === 'home') {
@@ -63,7 +101,7 @@ export default function App() {
             <div className="eyebrow">BASE DE HÉROES</div>
             <h1>Lautaro</h1>
           </div>
-          <div className="badge-chip"><span>{badge.icon}</span><b>{badge.label}</b><small>{progress.xp} XP</small></div>
+          <div className="top-actions"><SyncPill status={syncStatus} /><div className="badge-chip"><span>{badge.icon}</span><b>{badge.label}</b><small>{progress.xp} XP</small></div></div>
         </header>
 
         <main className="home-grid">
@@ -170,7 +208,7 @@ export default function App() {
 
       <main className="adult-main">
         {adultTab === 'ruta' && <RoutePanel progress={progress} />}
-        {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} />}
+        {adultTab === 'progreso' && <ProgressPanel progress={progress} onReset={resetData} syncStatus={syncStatus} />}
         {adultTab === 'sesion' && <SessionPanel onStart={() => startExercise('visual')} />}
         {adultTab === 'biblioteca' && <LibraryPanel />}
       </main>
@@ -320,10 +358,23 @@ function RoutePanel({ progress }) {
   )
 }
 
-function ProgressPanel({ progress, onReset }) {
+function SyncPill({ status }) {
+  const map = {
+    connecting: ['⏳','Conectando'],
+    syncing: ['↻','Sincronizando'],
+    synced: ['☁️','Guardado'],
+    offline: ['📱','Solo dispositivo'],
+    'not-configured': ['⚙️','Firebase pendiente'],
+  }
+  const [icon,label] = map[status] || map.offline
+  return <div className={'sync-pill ' + status}><span>{icon}</span><small>{label}</small></div>
+}
+
+function ProgressPanel({ progress, onReset, syncStatus }) {
   const rows = starterWords.map(w => ({...w, stat: progress.wordStats[w.id]}))
   return (
     <div className="dashboard">
+      <section className="cloud-card"><div><b>Estado del respaldo</b><p>{syncStatus === 'synced' ? 'El progreso de este dispositivo está sincronizado con Firebase.' : syncStatus === 'not-configured' ? 'Faltan las variables de Firebase en Netlify.' : syncStatus === 'connecting' || syncStatus === 'syncing' ? 'Estamos sincronizando el progreso…' : 'La app sigue funcionando localmente y reintentará cuando haya conexión.'}</p></div><SyncPill status={syncStatus} /></section>
       <div className="stat-card"><span>⚡</span><b>{progress.xp}</b><small>Experiencia total</small></div>
       <div className="stat-card"><span>🎯</span><b>{Object.values(progress.skillStats).reduce((a,s)=>a+s.attempts,0)}</b><small>Intentos registrados</small></div>
       <div className="stat-card"><span>📚</span><b>{rows.filter(r => accuracy(r.stat)>=80 && (r.stat?.attempts||0)>=5).length}</b><small>Palabras avanzando</small></div>
