@@ -189,7 +189,7 @@ export default function App() {
               <h2>Entrenamos un poder nuevo</h2>
               <p className="muted">Actividades cortas, claras y adaptadas. Una misión a la vez.</p>
               <button className="primary" onClick={() => setMode('child')}>Entrar a mis misiones</button>
-              {progress.assessment?.status !== 'completed' && <button className="hero-link" onClick={() => { setMode('adult'); setAdultTab('plan') }}>Primero: preparar mi plan →</button>}
+              {progress.assessment?.status !== 'completed' && <button className="hero-link" onClick={() => openAdult('plan')}>Primero: preparar mi plan →</button>}
             </div>
           </section>
 
@@ -200,7 +200,7 @@ export default function App() {
               <h3>Plan, progreso y próximo paso</h3>
               <p className="muted">Vas a ver qué trabajar, por qué, cuándo avanzar y qué hacer fuera de la app.</p>
             </div>
-            <button className="secondary" onClick={() => setMode('adult')}>Abrir panel</button>
+            <button className="secondary" onClick={() => openAdult('plan')}>Abrir panel</button>
           </section>
         </main>
       </div>
@@ -240,7 +240,7 @@ export default function App() {
             <section className="assessment-reminder">
               <span>🧭</span>
               <div><b>Plan personalizado pendiente</b><p>Las misiones de abajo sirven para explorar. Después de la evaluación, la app va a ordenar automáticamente qué conviene trabajar primero.</p></div>
-              <button className="secondary" onClick={() => { setMode('adult'); setAdultTab('plan') }}>Preparar plan</button>
+              <button className="secondary" onClick={() => openAdult('plan')}>Preparar plan</button>
             </section>
           )}
 
