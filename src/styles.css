@@ -284,3 +284,9 @@ details{background:#f8fafc;border-radius:12px;padding:10px 12px}summary{cursor:p
   .pronunciation-actions button{padding:9px 10px}
   .trace-shell{padding:16px}
 }
+
+.mobile-install{display:none;margin:-16px 0 18px}
+@media(max-width:800px){
+  .mobile-install{display:block}
+  .mobile-install .install-button,.mobile-install .install-status{display:inline-flex}
+}
