@@ -8,6 +8,23 @@ function shuffle(items) {
 
 function makeRound(words, type, index) {
   const target = words[index % words.length]
+
+  if (type === 'sound') {
+    const targetLetter = target.word[0].toUpperCase()
+    const alphabet = ['A','E','I','O','U','M','P','L','S','T','C','D','F','G']
+    const distractors = shuffle(alphabet.filter(letter => letter !== targetLetter)).slice(0, 2)
+    return {
+      id: type + '-' + index + '-' + target.id,
+      type,
+      target,
+      options: shuffle([targetLetter, ...distractors]).map(letter => ({
+        id: 'letter-' + letter,
+        word: letter,
+        letter,
+      })),
+    }
+  }
+
   const distractors = shuffle(words.filter(item => item.id !== target.id)).slice(0, 2)
   return {
     id: type + '-' + index + '-' + target.id,
@@ -59,6 +76,7 @@ export default function GuidedSession({
   focusMission,
   onCommit,
   onClose,
+  onFinish,
 }) {
   const rounds = useMemo(
     () => buildRounds(words, focusMission?.type || 'visual'),
@@ -104,7 +122,7 @@ export default function GuidedSession({
             <b>Última misión fuera de la pantalla</b>
             <p>Elegí una de las palabras practicadas y usala una vez en una situación real: pedir, señalar, buscar o nombrar.</p>
           </div>
-          <button className="primary" onClick={onClose}>Terminar por hoy</button>
+          <button className="primary" onClick={onFinish || onClose}>Terminar por hoy</button>
         </div>
       </div>
     )
@@ -139,7 +157,7 @@ export default function GuidedSession({
               round={round}
               feedback={feedback}
               showPronunciation
-              onChoose={item => commitAnswer(item.word[0] === round.target.word[0], round.target.id, 'sound')}
+              onChoose={item => commitAnswer(item.letter === round.target.word[0].toUpperCase(), round.target.id, 'sound')}
               onNext={goNext}
             />
           )}
