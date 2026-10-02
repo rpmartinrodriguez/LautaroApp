@@ -56,7 +56,6 @@ export function recordAttempt(progress, { skillId, itemId, correct, helpLevel = 
     help: 0,
     correctStreak: 0,
     recentResults: [],
-    help: 0,
   }
 
   const shouldTrackWord = !String(key).startsWith('cantidad-')
@@ -77,6 +76,7 @@ export function recordAttempt(progress, { skillId, itemId, correct, helpLevel = 
   const skillOld = progress.skillStats[skillId] || {
     attempts: 0,
     correct: 0,
+    help: 0,
     correctStreak: 0,
     recentResults: [],
   }
